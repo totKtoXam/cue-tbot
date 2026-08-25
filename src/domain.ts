@@ -48,6 +48,16 @@ function asNumber(v: unknown): number | null {
   return null;
 }
 
+function compare(left: unknown, right: unknown): number | null {
+  const a = asNumber(left);
+  const b = asNumber(right);
+  if (a != null && b != null) return a === b ? 0 : a > b ? 1 : -1;
+  if (typeof left === 'string' && typeof right === 'string') {
+    return left === right ? 0 : left > right ? 1 : -1;
+  }
+  return null;
+}
+
 function isEmpty(v: unknown): boolean {
   return v == null || v === '' || (Array.isArray(v) && v.length === 0);
 }
@@ -55,13 +65,14 @@ function isEmpty(v: unknown): boolean {
 export function evaluateLeaf(leaf: ConditionLeaf, ctx: EvaluationContext): boolean {
   const left = normalize(ctx[leaf.left]);
   const right = normalize(leaf.right);
+  const cmp = compare(left, right);
   switch (leaf.operator) {
     case 'eq': return left === right;
     case 'neq': return left !== right;
-    case 'gt': { const a = asNumber(left), b = asNumber(right); return a != null && b != null && a > b; }
-    case 'gte': { const a = asNumber(left), b = asNumber(right); return a != null && b != null && a >= b; }
-    case 'lt': { const a = asNumber(left), b = asNumber(right); return a != null && b != null && a < b; }
-    case 'lte': { const a = asNumber(left), b = asNumber(right); return a != null && b != null && a <= b; }
+    case 'gt': return cmp != null && cmp > 0;
+    case 'gte': return cmp != null && cmp >= 0;
+    case 'lt': return cmp != null && cmp < 0;
+    case 'lte': return cmp != null && cmp <= 0;
     case 'contains': return Array.isArray(left) ? left.includes(right) : String(left ?? '').includes(String(right ?? ''));
     case 'not_contains': return Array.isArray(left) ? !left.includes(right) : !String(left ?? '').includes(String(right ?? ''));
     case 'in': return Array.isArray(right) && right.includes(left as never);
