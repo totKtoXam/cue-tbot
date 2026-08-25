@@ -70,6 +70,7 @@ CREATE TABLE IF NOT EXISTS reminder_targets (
 CREATE TABLE IF NOT EXISTS reminder_runs (
   id TEXT PRIMARY KEY,
   reminder_id TEXT NOT NULL,
+  period_key TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'active',
   attempt INTEGER NOT NULL DEFAULT 0,
   started_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -78,7 +79,8 @@ CREATE TABLE IF NOT EXISTS reminder_runs (
   stopped_at TEXT,
   pause_until TEXT,
   context_json TEXT NOT NULL DEFAULT '{}',
-  FOREIGN KEY(reminder_id) REFERENCES reminder_definitions(id)
+  FOREIGN KEY(reminder_id) REFERENCES reminder_definitions(id),
+  UNIQUE(reminder_id, period_key)
 );
 
 CREATE TABLE IF NOT EXISTS checklist_items (
