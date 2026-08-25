@@ -6,6 +6,10 @@ CREATE TABLE IF NOT EXISTS bot_config (
   username TEXT,
   default_parse_mode TEXT NOT NULL DEFAULT 'HTML',
   timezone TEXT NOT NULL DEFAULT 'UTC',
+  working_start TEXT NOT NULL DEFAULT '09:00',
+  working_end TEXT NOT NULL DEFAULT '18:00',
+  working_days_json TEXT NOT NULL DEFAULT '["mon","tue","wed","thu","fri"]',
+  commands_json TEXT NOT NULL DEFAULT '[]',
   is_enabled INTEGER NOT NULL DEFAULT 1,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
