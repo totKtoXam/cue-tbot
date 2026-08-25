@@ -4,6 +4,11 @@ export interface Env {
   TELEGRAM_WEBHOOK_SECRET?: string;
   CRON_SECRET?: string;
   GOOGLE_CALENDAR_API_KEY?: string;
+  GOOGLE_CALENDAR_ACCESS_TOKEN?: string;
+  GOOGLE_CLIENT_ID?: string;
+  GOOGLE_CLIENT_SECRET?: string;
+  GOOGLE_REFRESH_TOKEN?: string;
+  GOOGLE_CALENDAR_ID?: string;
   APP_TIMEZONE?: string;
 }
 
