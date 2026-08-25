@@ -6,11 +6,19 @@ CREATE TABLE IF NOT EXISTS bot_config (
   username TEXT,
   default_parse_mode TEXT NOT NULL DEFAULT 'HTML',
   timezone TEXT NOT NULL DEFAULT 'UTC',
-  working_start TEXT NOT NULL DEFAULT '09:00',
-  working_end TEXT NOT NULL DEFAULT '18:00',
-  working_days_json TEXT NOT NULL DEFAULT '["mon","tue","wed","thu","fri"]',
   commands_json TEXT NOT NULL DEFAULT '[]',
   is_enabled INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS work_schedules (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  timezone TEXT NOT NULL,
+  weekly_json TEXT NOT NULL,
+  exceptions_json TEXT NOT NULL DEFAULT '[]',
+  is_default INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -23,7 +31,6 @@ CREATE TABLE IF NOT EXISTS clients (
   timezone TEXT,
   tags_json TEXT NOT NULL DEFAULT '[]',
   custom_fields_json TEXT NOT NULL DEFAULT '{}',
-  calendar_id TEXT,
   is_active INTEGER NOT NULL DEFAULT 1,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -52,6 +59,7 @@ CREATE TABLE IF NOT EXISTS reminder_definitions (
   name TEXT NOT NULL,
   description TEXT,
   template_id TEXT NOT NULL,
+  work_schedule_id TEXT,
   priority TEXT NOT NULL DEFAULT 'normal',
   schedule_json TEXT NOT NULL,
   pause_rules_json TEXT NOT NULL DEFAULT '[]',
@@ -60,7 +68,8 @@ CREATE TABLE IF NOT EXISTS reminder_definitions (
   enabled INTEGER NOT NULL DEFAULT 1,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY(template_id) REFERENCES message_templates(id)
+  FOREIGN KEY(template_id) REFERENCES message_templates(id),
+  FOREIGN KEY(work_schedule_id) REFERENCES work_schedules(id)
 );
 
 CREATE TABLE IF NOT EXISTS reminder_targets (
