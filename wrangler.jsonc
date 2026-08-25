@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "cue-tbot",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-25",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "cue-db",
+      "database_id": "REPLACE_WITH_D1_DATABASE_ID"
+    }
+  ],
+  "vars": {
+    "APP_TIMEZONE": "Asia/Qyzylorda"
+  }
+}
