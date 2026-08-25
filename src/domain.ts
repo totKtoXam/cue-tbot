@@ -37,6 +37,11 @@ export interface EvaluationContext {
   [path: string]: unknown;
 }
 
+export interface ResolvedRule {
+  matched: boolean;
+  actions: RuleAction[];
+}
+
 function normalize(value: unknown): unknown {
   if (typeof value === 'string') return value.trim();
   return value;
@@ -95,6 +100,12 @@ export function evaluateCondition(node: ConditionNode, ctx: EvaluationContext): 
   return node.operator === 'and'
     ? node.children.every((child) => evaluateCondition(child, ctx))
     : node.children.some((child) => evaluateCondition(child, ctx));
+}
+
+export function resolveRule(rule: RuleDefinition | null | undefined, ctx: EvaluationContext): ResolvedRule {
+  if (!rule) return { matched: true, actions: [{ type: 'send_message' }] };
+  const matched = evaluateCondition(rule.condition, ctx);
+  return { matched, actions: matched ? rule.then : (rule.else ?? []) };
 }
 
 export function validateCondition(node: ConditionNode, depth = 0): string[] {

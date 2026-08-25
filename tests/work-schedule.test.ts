@@ -26,4 +26,10 @@ describe('work schedule', () => {
     const s:WorkScheduleDefinition={timezone:'UTC',weekly:{sat:[],sun:[]},exceptions:[{date:'2026-08-23',working:true,intervals:[{start:'10:00',end:'12:00'}]}]};
     expect(resolveWorkSchedule(s,new Date('2026-08-23T11:00:00Z')).currentInterval).toEqual({start:'10:00',end:'12:00'});
   });
+
+  it('reports when the final working interval has ended', () => {
+    const s=defaultWorkSchedule('UTC');
+    expect(resolveWorkSchedule(s,new Date('2026-08-24T17:30:00Z')).isFinished).toBe(false);
+    expect(resolveWorkSchedule(s,new Date('2026-08-24T18:01:00Z')).isFinished).toBe(true);
+  });
 });
