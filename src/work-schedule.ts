@@ -17,7 +17,8 @@ export function resolveWorkSchedule(schedule:WorkScheduleDefinition,now=new Date
   const exception=schedule.exceptions?.find(x=>x.date===p.date);
   const intervals=exception ? (exception.working ? (exception.intervals??[]) : []) : (schedule.weekly[p.weekday]??[]);
   const currentInterval=intervals.find(i=>isInsideInterval(p.time,i))??null;
-  return {date:p.date,weekday:p.weekday,currentTime:p.time,isWorkingDay:intervals.length>0,isWorkingTime:Boolean(currentInterval),currentInterval};
+  const lastEnd=intervals.length?intervals.map(i=>i.end).sort().at(-1)??null:null;
+  return {date:p.date,weekday:p.weekday,currentTime:p.time,isWorkingDay:intervals.length>0,isWorkingTime:Boolean(currentInterval),currentInterval,intervals,lastEnd,isFinished:Boolean(lastEnd&&p.time>lastEnd)};
 }
 export function defaultWorkSchedule(timezone='Asia/Qyzylorda'):WorkScheduleDefinition{
   const day=[{start:'09:00',end:'13:00'},{start:'14:00',end:'18:00'}];
