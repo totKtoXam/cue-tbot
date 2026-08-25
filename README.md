@@ -4,43 +4,57 @@ Cue is a configurable Telegram reminder and automation engine with a visual cond
 
 ## Core concepts
 
-- **Reminder Definition** — reusable schedule, template, targeting, conditions and pause rules.
+- **Reminder Definition** — reusable trigger window, Work Schedule, template, targeting, conditions and pause rules.
 - **Reminder Run** — one recurrence-period execution with attempts, checklist state, pause/stop state and delivery history.
-- **Clients** — Telegram recipients with optional Google Calendar identity.
+- **Work Schedule** — reusable built-in weekly schedule with multiple intervals per day, timezone and date exceptions.
+- **Clients** — Telegram recipients.
 - **Templates & aliases** — reusable messages using `{{client.name}}`, `{{deadline}}`, `{{remaining_count}}`, `{{reminder.name}}` and custom aliases.
 - **Conditions Builder** — visual nested AND/OR groups with field/operator/value rules and workflow actions.
-- **Checklist mode** — reminders target pending items only, until everything is done, the time window ends, or the run is stopped.
-- **Runs console** — manually pause/resume/stop a run and mark checklist items done/pending.
+- **Checklist mode** — reminders target pending items only until everything is done, the allowed time ends or the run is stopped.
 
-## Telegram controls
+## Work Schedule
 
-The template model stores inline callback buttons, URL buttons, reply-keyboard buttons, commands and request controls. Checklist notifications use an inline **Done** callback bound to the exact checklist item.
+Cue does not require Google Calendar or another external calendar provider. The administration UI contains a calendar-style weekly editor. Drag across half-hour cells to define availability, for example:
+
+- Monday–Friday `09:00–13:00` and `14:00–18:00`;
+- Saturday/Sunday off;
+- a specific holiday as a date exception;
+- a special date with custom working intervals.
+
+A Work Schedule is reusable and can be assigned to multiple reminders. Reminder trigger windows and Work Schedules are intentionally separate:
+
+- trigger window answers **when Cue should evaluate a reminder**;
+- Work Schedule answers **whether the current moment is allowed working time**;
+- Conditions answer **whether actions should execute**.
+
+Conditions expose:
+
+- `schedule.isWorkingDay`
+- `schedule.isWorkingTime`
+- `schedule.currentTime`
+- `schedule.weekday`
+- `schedule.currentInterval`
 
 ## Runtime
 
-Cue is implemented as a TypeScript/Hono worker with D1 persistence. It is webhook-first and does not require Telegram long polling.
+Cue is implemented as a TypeScript/Hono worker with D1 persistence and Telegram webhook delivery.
 
-Required/optional secrets:
+Environment values:
 
 ```env
 TELEGRAM_BOT_TOKEN=
 TELEGRAM_WEBHOOK_SECRET=
 CRON_SECRET=
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-GOOGLE_REFRESH_TOKEN=
-GOOGLE_CALENDAR_ID=
-# Optional alternative for development/testing:
-GOOGLE_CALENDAR_ACCESS_TOKEN=
 APP_TIMEZONE=Asia/Qyzylorda
 ```
 
-Never commit real values. For ChatGPT Sites, configure them as hosted environment secrets/values.
+Never commit real secrets.
 
 ### Endpoints
 
 - `POST /api/telegram/webhook` — Telegram webhook.
 - `POST /api/cron/tick` — authenticated scheduler tick.
+- `GET/POST/PUT /api/work-schedules` — Work Schedule configuration.
 - `GET /api/runs` and run/checklist actions — operational control.
 - `/` — web administration interface.
 
@@ -52,49 +66,34 @@ npm run db:local
 npm run dev
 ```
 
-The committed `wrangler.jsonc` contains a placeholder D1 database id for direct Cloudflare deployment. A Sites deployment can bind its provisioned D1 database as `DB` via `.openai/hosting.json`.
-
 ## Scheduler
 
-The scheduler is intentionally exposed as an authenticated tick endpoint instead of an infinite background loop:
+Cue uses an authenticated tick endpoint instead of an infinite background loop:
 
 ```http
 POST /api/cron/tick
 Authorization: Bearer <CRON_SECRET>
 ```
 
-A one-minute external cadence is a practical default. Cue evaluates each reminder schedule and only executes definitions that are due. Weekly runs use an ISO-week `period_key`, so a completed Friday run cannot become active again the next week.
-
-## Google Calendar provider
-
-Cue includes a Google Calendar provider with OAuth refresh-token support. Calendar context exposed to Conditions includes:
-
-- `calendar.isWorkingDay`
-- `calendar.isWorkingTime`
-- `calendar.isBusy`
-
-If OAuth/calendar settings are absent, Cue falls back to the configured working-day/time window instead of breaking reminder execution. This keeps the scheduler usable while Calendar integration is being configured.
-
-## Visual Conditions Builder
-
-A rule can contain nested `ALL (AND)` / `ANY (OR)` groups. Current sources include checklist counts/completion, Calendar state, current time, reminder attempt/priority, client tags and aliases. Operators include equality, numeric comparisons, contains/in, empty checks, date comparisons and between.
-
-The editor provides both a readable preview and an Advanced JSON representation. A configured rule is attached to a Reminder Definition; users do not need to edit JSON directly.
+A one-minute cadence is a practical default. Each Reminder Definition decides whether it is actually due.
 
 ## Timesheet preset
 
 The preset creates:
 
-- Friday 14:00–18:00 window;
+- Friday evaluation starting at 14:00;
 - 30-minute retry interval;
 - high priority;
 - all currently active clients as targets;
 - checklist mode;
-- condition: pending count > 0 AND Calendar working time;
+- default Work Schedule assignment;
+- condition: pending count > 0 AND `schedule.isWorkingTime = true`;
 - notifications only to pending employees;
 - a per-item **Done** Telegram callback;
-- completion when all items are done, the period ends, or the run is manually stopped.
+- completion when all checklist items are done or the run is manually stopped.
+
+If Friday work ends at 18:00 in the selected Work Schedule, reminders automatically stop being sent after 18:00 even though the reminder trigger window may remain open longer.
 
 ## Current MVP scope
 
-The engine, web configuration UI, condition builder, Google Calendar provider, Telegram webhook, scheduler, manual run/checklist controls and timesheet preset are implemented. The next product-level extensions are richer Telegram-control configuration (multiple button rows/actions), per-client calendar evaluation in the same run, delivery analytics, authentication/roles for public deployments, and additional recurrence types beyond weekly schedules.
+The engine, visual Work Schedule editor, reminder editor, conditions builder, Telegram webhook, scheduler, manual run/checklist controls and timesheet preset are implemented. Product-level extensions include richer Telegram-control configuration, delivery analytics, authentication/roles for public deployments and recurrence types beyond weekly schedules.
