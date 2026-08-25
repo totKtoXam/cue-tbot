@@ -1,42 +1,233 @@
-export const appHtml = String.raw`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cue</title><style>
-:root{font-family:Inter,system-ui,sans-serif;color:#111827;background:#f5f7fb}*{box-sizing:border-box}body{margin:0}.layout{display:grid;grid-template-columns:230px 1fr;min-height:100vh}.side{background:#111827;color:white;padding:20px 14px}.brand{font-size:24px;font-weight:800;margin:0 10px 22px}.side button{width:100%;border:0;background:transparent;color:#cbd5e1;padding:10px;text-align:left;border-radius:9px;cursor:pointer}.side button:hover,.side button.active{background:#1f2937;color:#fff}.main{padding:28px;max-width:1380px;width:100%;margin:auto}.view.hidden{display:none}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:18px}.h1{font-size:27px;font-weight:800}.muted{color:#6b7280;font-size:14px}.card{background:white;border:1px solid #e5e7eb;border-radius:14px;padding:16px;margin-bottom:15px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}.stat{font-size:27px;font-weight:800;margin-top:5px}.btn{border:1px solid #d1d5db;background:#fff;padding:9px 12px;border-radius:8px;cursor:pointer}.btn.primary{background:#111827;color:#fff}.btn.bad{color:#b91c1c}.field{display:grid;gap:5px;margin-bottom:12px}.field label{font-size:12px;font-weight:700}input,select,textarea{padding:9px;border:1px solid #d1d5db;border-radius:8px;font:inherit;width:100%}textarea{min-height:100px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.table{width:100%;border-collapse:collapse}.table td,.table th{padding:9px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:13px}.checks{display:flex;gap:6px;flex-wrap:wrap}.checks label{padding:6px 8px;border:1px solid #d1d5db;border-radius:7px}.targets{max-height:170px;overflow:auto;border:1px solid #e5e7eb;border-radius:9px;padding:8px}.targets label{display:block;padding:5px}.rule{border:1px solid #dbe2ea;background:#f8fafc;border-radius:10px;padding:10px;margin:8px 0}.group{border-left:3px solid #111827;padding-left:10px;margin:8px 0}.preview{background:#111827;color:#e5e7eb;border-radius:10px;padding:12px;white-space:pre-wrap;min-height:100px}.pill{font-size:12px;background:#eef2ff;padding:4px 7px;border-radius:99px}.schedule-wrap{overflow:auto}.week-grid{display:grid;grid-template-columns:70px repeat(24,34px);user-select:none;min-width:886px}.wg-head,.wg-day,.slot{border-right:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;height:34px}.wg-head{font-size:10px;text-align:center;padding-top:9px;background:#fafafa}.wg-day{font-size:12px;font-weight:700;padding:9px 6px;position:sticky;left:0;background:white;z-index:2}.slot{cursor:crosshair;background:#fff}.slot.on{background:#111827}.slot.drag{outline:2px solid #6b7280;outline-offset:-2px}.exception{display:grid;grid-template-columns:150px 120px 1fr auto;gap:8px;align-items:center;margin:7px 0}.tabs{display:flex;gap:7px;margin-bottom:10px}.tabs button{border:0;padding:7px 10px;border-radius:7px;background:#eef2f7}.tabs button.active{background:#111827;color:white}@media(max-width:900px){.layout{grid-template-columns:1fr}.two,.grid3{grid-template-columns:1fr}.main{padding:16px}}
-</style></head><body><div class="layout"><aside class="side"><div class="brand">Cue</div>
-<button class="active" data-view="dashboard">Dashboard</button><button data-view="work">Work schedules</button><button data-view="reminders">Reminders</button><button data-view="runs">Runs</button><button data-view="conditions">Conditions</button><button data-view="clients">Clients</button><button data-view="templates">Templates</button><button data-view="aliases">Aliases</button></aside><main class="main">
-<section class="view" id="dashboard"><div class="top"><div><div class="h1">Cue</div><div class="muted">Telegram reminders driven by schedules, conditions and state.</div></div><button class="btn primary" id="timesheetPreset">Create timesheet preset</button></div><div class="grid3"><div class="card"><div class="muted">Active reminders</div><div class="stat" id="statR">—</div></div><div class="card"><div class="muted">Clients</div><div class="stat" id="statC">—</div></div><div class="card"><div class="muted">Pending checklist</div><div class="stat" id="statP">—</div></div></div></section>
-<section class="view hidden" id="work"><div class="top"><div><div class="h1">Work schedule</div><div class="muted">Calendar-style weekly availability. Drag across half-hour cells to add or remove working time.</div></div><button class="btn primary" id="saveWork">Save schedule</button></div><div class="card"><div class="two"><div class="field"><label>Name</label><input id="workName" value="Default work schedule"></div><div class="field"><label>Timezone</label><input id="workTz" value="Asia/Qyzylorda"></div></div><label class="row"><input style="width:auto" type="checkbox" id="workDefault" checked> Default schedule</label></div><div class="card schedule-wrap"><div id="weekGrid" class="week-grid"></div></div><div class="card"><div class="top"><div><b>Date exceptions</b><div class="muted">Holidays, special working days or custom hours.</div></div><button class="btn" id="addException">+ Exception</button></div><div id="exceptions"></div></div><div class="card"><b>Saved schedules</b><table class="table"><tbody id="workRows"></tbody></table></div></section>
-<section class="view hidden" id="reminders"><div class="top"><div><div class="h1">Reminders</div><div class="muted">Trigger window + Work Schedule + condition rule + actions.</div></div></div><div class="card"><div class="two"><div><div class="field"><label>Name</label><input id="remName" value="Weekly reminder"></div><div class="field"><label>Template</label><select id="remTpl"></select></div><div class="field"><label>Work schedule</label><select id="remWork"><option value="">Default / fallback</option></select></div><div class="field"><label>Priority</label><select id="remPriority"><option>normal</option><option>high</option><option>critical</option><option>low</option></select></div></div><div><div class="field"><label>Active weekdays</label><div class="checks" id="remDays"></div></div><div class="two"><div class="field"><label>Start after</label><input type="time" id="remStart" value="14:00"></div><div class="field"><label>Stop trigger window</label><input type="time" id="remStop" value="23:59"></div></div><div class="field"><label>Repeat every, minutes</label><input type="number" id="remRepeat" value="30"></div></div></div><div class="field"><label>Recipients</label><div class="targets" id="remTargets"></div></div><div class="row"><label><input type="checkbox" id="remChecklist"> Checklist mode</label><label><input type="checkbox" id="remUseRule" checked> Use current visual condition rule</label></div><button class="btn primary" id="saveReminder">Create reminder</button></div><div class="card"><table class="table"><thead><tr><th>Name</th><th>Priority</th><th>Work schedule</th><th>Checklist</th></tr></thead><tbody id="remRows"></tbody></table></div></section>
-<section class="view hidden" id="conditions"><div class="top"><div><div class="h1">Conditions builder</div><div class="muted">Schedule is context; conditions decide whether actions run.</div></div><button class="btn" id="addCond">+ Condition</button></div><div class="two"><div class="card"><div class="row"><b>WHEN</b><select style="width:auto" id="rootOp"><option value="and">ALL / AND</option><option value="or">ANY / OR</option></select><button class="btn" id="addGroup">+ Group</button></div><div id="tree"></div><hr><b>THEN</b><div class="field"><select id="action"><option value="send_message">Send message</option><option value="select_pending">Select pending recipients</option><option value="stop_run">Stop run</option><option value="pause_run">Pause run</option><option value="skip">Skip</option></select></div><button class="btn" id="validate">Validate</button> <span id="valid"></span></div><div class="card"><div class="tabs"><button class="active" data-tab="human">Readable</button><button data-tab="json">JSON</button></div><pre class="preview" id="human"></pre><pre class="preview hidden" id="json"></pre></div></div></section>
-<section class="view hidden" id="runs"><div class="top"><div><div class="h1">Runs</div><div class="muted">Pause, stop and manually update checklist state.</div></div><button class="btn" id="refreshRuns">Refresh</button></div><div id="runCards"></div></section>
-<section class="view hidden" id="clients"><div class="top"><div><div class="h1">Clients</div></div></div><div class="card"><div class="two"><input id="clientName" placeholder="Name"><input id="clientChat" placeholder="Telegram chat ID"></div><button class="btn primary" id="addClient" style="margin-top:10px">Add client</button><table class="table"><tbody id="clientRows"></tbody></table></div></section>
-<section class="view hidden" id="templates"><div class="top"><div><div class="h1">Templates</div></div></div><div class="card"><input id="tplName" value="Reminder" placeholder="Name"><textarea id="tplBody">Hi {{client.name}}!\n\nPlease complete the task before {{deadline}}.\nRemaining: {{remaining_count}}.</textarea><button class="btn primary" id="saveTpl">Save template</button></div></section>
-<section class="view hidden" id="aliases"><div class="top"><div><div class="h1">Aliases</div></div></div><div class="card"><div class="two"><input id="aliasKey" placeholder="company_name"><input id="aliasValue" placeholder="Value"></div><button class="btn primary" id="saveAlias" style="margin-top:10px">Save alias</button><table class="table"><tbody id="aliasRows"></tbody></table></div></section>
-</main></div><script>
-const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)], days=['mon','tue','wed','thu','fri','sat','sun'], dayNames={mon:'Mon',tue:'Tue',wed:'Wed',thu:'Thu',fri:'Fri',sat:'Sat',sun:'Sun'};
-let clients=[],templates=[],works=[],reminders=[];
-const slots=[];for(let h=8;h<20;h++)for(let m of [0,30])slots.push(String(h).padStart(2,'0')+':'+String(m).padStart(2,'0'));
-const selected=Object.fromEntries(days.map(d=>[d,new Set()])); days.slice(0,5).forEach(d=>slots.forEach((t,i)=>{if((t>='09:00'&&t<'13:00')||(t>='14:00'&&t<'18:00'))selected[d].add(i)}));
-let exceptions=[];
-function renderWeek(){const g=$('#weekGrid');g.innerHTML='<div class="wg-head"></div>'+slots.map((s,i)=>'<div class="wg-head">'+(i%2===0?s:'')+'</div>').join('');days.forEach(d=>{g.insertAdjacentHTML('beforeend','<div class="wg-day">'+dayNames[d]+'</div>');slots.forEach((s,i)=>g.insertAdjacentHTML('beforeend','<div class="slot '+(selected[d].has(i)?'on':'')+'" data-day="'+d+'" data-slot="'+i+'"></div>'))});let drag=null;$$('.slot').forEach(x=>{x.onmousedown=e=>{e.preventDefault();drag={day:x.dataset.day,start:+x.dataset.slot,on:!selected[x.dataset.day].has(+x.dataset.slot)};paint(x)};x.onmouseenter=()=>{if(drag&&drag.day===x.dataset.day){const a=Math.min(drag.start,+x.dataset.slot),b=Math.max(drag.start,+x.dataset.slot);for(let i=a;i<=b;i++){const y=$('.slot[data-day="'+drag.day+'"][data-slot="'+i+'"]');paint(y)}}}});document.onmouseup=()=>drag=null}
-function paint(x){const d=x.dataset.day,i=+x.dataset.slot;if(drag.on)selected[d].add(i);else selected[d].delete(i);x.classList.toggle('on',drag.on)}
-function intervals(day){const ids=[...selected[day]].sort((a,b)=>a-b), out=[];if(!ids.length)return out;let s=ids[0],p=s;for(const i of ids.slice(1)){if(i===p+1){p=i;continue}out.push({start:slots[s],end:endSlot(p)});s=p=i}out.push({start:slots[s],end:endSlot(p)});return out}
-function endSlot(i){const [h,m]=slots[i].split(':').map(Number);const n=h*60+m+30;return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0')}
-function renderExceptions(){const h=$('#exceptions');h.innerHTML=exceptions.map((e,i)=>'<div class="exception"><input type="date" value="'+e.date+'" data-ex-date="'+i+'"><select data-ex-work="'+i+'"><option value="false" '+(!e.working?'selected':'')+'>Day off</option><option value="true" '+(e.working?'selected':'')+'>Working day</option></select><input placeholder="09:00-13:00,14:00-18:00" value="'+(e.intervals||[]).map(x=>x.start+'-'+x.end).join(',')+'" data-ex-int="'+i+'"><button class="btn bad" data-ex-del="'+i+'">×</button></div>').join('');$$('[data-ex-del]').forEach(b=>b.onclick=()=>{exceptions.splice(+b.dataset.exDel,1);renderExceptions()});$$('[data-ex-date]').forEach(x=>x.onchange=()=>exceptions[+x.dataset.exDate].date=x.value);$$('[data-ex-work]').forEach(x=>x.onchange=()=>exceptions[+x.dataset.exWork].working=x.value==='true');$$('[data-ex-int]').forEach(x=>x.onchange=()=>exceptions[+x.dataset.exInt].intervals=x.value.split(',').filter(Boolean).map(v=>{const [start,end]=v.trim().split('-');return{start,end}}))}
-$('#addException').onclick=()=>{exceptions.push({date:'',working:false,intervals:[]});renderExceptions()};
-function currentRule(){return{condition:rule.root,then:[{type:$('#action').value}]}}
-const rule={root:{type:'group',operator:'and',children:[{type:'condition',left:'checklist.pendingCount',operator:'gt',right:0},{type:'condition',left:'schedule.isWorkingTime',operator:'eq',right:true}]}};
-const sources=['checklist.pendingCount','checklist.doneCount','checklist.completionPercent','schedule.isWorkingDay','schedule.isWorkingTime','schedule.currentTime','schedule.weekday','schedule.currentInterval','system.currentTime','reminder.priority','reminder.attempt','client.tags','alias.custom'],ops=['eq','neq','gt','gte','lt','lte','contains','not_contains','in','not_in','empty','not_empty','before','after','between'];
-function removeNode(g,n){let i=g.children.indexOf(n);if(i>=0){g.children.splice(i,1);return true}return g.children.some(c=>c.type==='group'&&removeNode(c,n))}
-function drawGroup(g,h,root=false){const box=document.createElement('div');box.className='group';box.innerHTML='<div class="row"><b>'+(root?'ROOT':'GROUP')+'</b><select class="op" style="width:auto"><option value="and">AND</option><option value="or">OR</option></select>'+(root?'':'<button class="btn delg">Remove</button>')+'</div>';box.querySelector('.op').value=g.operator;box.querySelector('.op').onchange=e=>{g.operator=e.target.value;preview()};if(!root)box.querySelector('.delg').onclick=()=>{removeNode(rule.root,g);draw()};g.children.forEach(n=>n.type==='group'?drawGroup(n,box):drawLeaf(n,box));const a=document.createElement('button');a.className='btn';a.textContent='+ condition';a.onclick=()=>{g.children.push({type:'condition',left:'schedule.isWorkingTime',operator:'eq',right:true});draw()};const gg=document.createElement('button');gg.className='btn';gg.textContent='+ group';gg.onclick=()=>{g.children.push({type:'group',operator:'or',children:[]});draw()};box.append(a,gg);h.append(box)}
-function drawLeaf(n,h){const r=document.createElement('div');r.className='rule row';const s=document.createElement('select');sources.forEach(v=>s.add(new Option(v,v)));s.value=n.left;s.onchange=()=>{n.left=s.value;preview()};const o=document.createElement('select');ops.forEach(v=>o.add(new Option(v,v)));o.value=n.operator;o.onchange=()=>{n.operator=o.value;preview()};const v=document.createElement('input');v.value=String(n.right??'');v.oninput=()=>{n.right=v.value==='true'?true:v.value==='false'?false:(v.value!==''&&!isNaN(Number(v.value))?Number(v.value):v.value);preview()};const d=document.createElement('button');d.className='btn';d.textContent='×';d.onclick=()=>{removeNode(rule.root,n);draw()};r.append(s,o,v,d);h.append(r)}
-function human(n,d=0){return n.type==='condition'?'  '.repeat(d)+'• '+n.left+' '+n.operator+' '+JSON.stringify(n.right):'  '.repeat(d)+(n.operator==='and'?'ALL':'ANY')+'\n'+n.children.map(x=>human(x,d+1)).join('\n')}
-function preview(){$('#human').textContent=human(rule.root)+'\n\nTHEN\n  • '+$('#action').value;$('#json').textContent=JSON.stringify(currentRule(),null,2)}function draw(){const h=$('#tree');h.innerHTML='';drawGroup(rule.root,h,true);$('#rootOp').value=rule.root.operator;preview()}
-$('#rootOp').onchange=()=>{rule.root.operator=$('#rootOp').value;draw()};$('#addCond').onclick=()=>{rule.root.children.push({type:'condition',left:'schedule.currentTime',operator:'gte',right:'15:00'});draw()};$('#addGroup').onclick=()=>{rule.root.children.push({type:'group',operator:'or',children:[]});draw()};$('#action').onchange=preview;$('#validate').onclick=async()=>{const x=await fetch('/api/rules/validate',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(currentRule())}).then(r=>r.json());$('#valid').textContent=x.valid?'Valid':x.errors.join(', ')};$$('[data-tab]').forEach(b=>b.onclick=()=>{$$('[data-tab]').forEach(x=>x.classList.remove('active'));b.classList.add('active');$('#human').classList.toggle('hidden',b.dataset.tab!=='human');$('#json').classList.toggle('hidden',b.dataset.tab!=='json')});
-function dayChecks(){return days.map(d=>'<label><input type="checkbox" value="'+d+'" '+(d==='fri'?'checked':'')+'>'+dayNames[d]+'</label>').join('')}$('#remDays').innerHTML=dayChecks();
-async function refresh(){const d=await fetch('/api/dashboard').then(r=>r.json());$('#statR').textContent=d.reminders;$('#statC').textContent=d.clients;$('#statP').textContent=d.pending;[clients,templates,works,reminders]=await Promise.all(['/api/clients','/api/templates','/api/work-schedules','/api/reminders'].map(u=>fetch(u).then(r=>r.json())));$('#clientRows').innerHTML=clients.map(x=>'<tr><td>'+x.display_name+'</td><td>'+x.telegram_chat_id+'</td></tr>').join('');$('#remTpl').innerHTML=templates.map(x=>'<option value="'+x.id+'">'+x.name+'</option>').join('');$('#remWork').innerHTML='<option value="">Default / fallback</option>'+works.map(x=>'<option value="'+x.id+'">'+x.name+'</option>').join('');$('#remTargets').innerHTML=clients.map(x=>'<label><input type="checkbox" value="'+x.id+'"> '+x.display_name+'</label>').join('');$('#workRows').innerHTML=works.map(x=>'<tr><td>'+x.name+'</td><td>'+x.timezone+'</td><td>'+(x.is_default?'default':'')+'</td></tr>').join('');$('#remRows').innerHTML=reminders.map(x=>'<tr><td>'+x.name+'</td><td><span class="pill">'+x.priority+'</span></td><td>'+(x.work_schedule_name||'fallback')+'</td><td>'+(x.checklist_mode?'yes':'no')+'</td></tr>').join('');const aliases=await fetch('/api/aliases').then(r=>r.json());$('#aliasRows').innerHTML=aliases.map(x=>'<tr><td>{{'+x.key+'}}</td><td>'+x.value+'</td></tr>').join('');await refreshRuns()}
-$('#saveWork').onclick=async()=>{const weekly={};days.forEach(d=>weekly[d]=intervals(d));await fetch('/api/work-schedules',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name:$('#workName').value,timezone:$('#workTz').value,weekly,exceptions,isDefault:$('#workDefault').checked})});await refresh()};
-$('#saveReminder').onclick=async()=>{const targetIds=$$('#remTargets input:checked').map(x=>x.value),weekdays=$$('#remDays input:checked').map(x=>x.value);await fetch('/api/reminders',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name:$('#remName').value,template_id:$('#remTpl').value,work_schedule_id:$('#remWork').value||null,priority:$('#remPriority').value,schedule:{kind:'weekly',weekdays,startTime:$('#remStart').value,stopTime:$('#remStop').value,repeatEveryMinutes:Number($('#remRepeat').value),timezone:$('#workTz').value},pauseRules:[],checklistMode:$('#remChecklist').checked,targetIds,conditionRule:$('#remUseRule').checked?currentRule():undefined})});await refresh()};
-$('#addClient').onclick=async()=>{await fetch('/api/clients',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({display_name:$('#clientName').value,telegram_chat_id:$('#clientChat').value})});await refresh()};$('#saveTpl').onclick=async()=>{await fetch('/api/templates',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name:$('#tplName').value,body:$('#tplBody').value,controls:[]})});await refresh()};$('#saveAlias').onclick=async()=>{await fetch('/api/aliases',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({key:$('#aliasKey').value,value:$('#aliasValue').value})});await refresh()};$('#timesheetPreset').onclick=async()=>{await fetch('/api/presets/timesheet',{method:'POST'});await refresh()};
-async function refreshRuns(){const rs=await fetch('/api/runs').then(r=>r.json());$('#runCards').innerHTML=rs.map(r=>'<div class="card"><div class="row"><b>'+r.reminder_name+'</b><span class="pill">'+r.status+'</span><span class="muted">attempt '+r.attempt+'</span><button class="btn" data-list="'+r.id+'">Checklist</button><button class="btn" data-pause="'+r.id+'">Pause 1h</button><button class="btn" data-resume="'+r.id+'">Resume</button><button class="btn bad" data-stop="'+r.id+'">Stop</button></div><div id="check-'+r.id+'"></div></div>').join('');$$('[data-list]').forEach(b=>b.onclick=async()=>{const xs=await fetch('/api/runs/'+b.dataset.list+'/checklist').then(r=>r.json());$('#check-'+b.dataset.list).innerHTML='<table class="table">'+xs.map(x=>'<tr><td>'+x.label+'</td><td>'+x.status+'</td><td><button class="btn" data-toggle="'+x.id+'">Toggle</button></td></tr>').join('')+'</table>';$$('[data-toggle]').forEach(t=>t.onclick=async()=>{await fetch('/api/checklist/'+t.dataset.toggle+'/toggle',{method:'POST'});await refreshRuns()})});$$('[data-stop]').forEach(b=>b.onclick=async()=>{await fetch('/api/runs/'+b.dataset.stop+'/stop',{method:'POST'});await refreshRuns()});$$('[data-resume]').forEach(b=>b.onclick=async()=>{await fetch('/api/runs/'+b.dataset.resume+'/resume',{method:'POST'});await refreshRuns()});$$('[data-pause]').forEach(b=>b.onclick=async()=>{await fetch('/api/runs/'+b.dataset.pause+'/pause',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({until:new Date(Date.now()+3600000).toISOString()})});await refreshRuns()})}
-$('#refreshRuns').onclick=refreshRuns;$$('.side button').forEach(b=>b.onclick=()=>{$$('.side button').forEach(x=>x.classList.remove('active'));b.classList.add('active');$$('.view').forEach(x=>x.classList.add('hidden'));$('#'+b.dataset.view).classList.remove('hidden')});
-renderWeek();renderExceptions();draw();fetch('/api/work-schedules/seed-default',{method:'POST'}).finally(refresh);
-</script></body></html>`;
+import { uiCss } from './ui-css';
+import { uiScript } from './ui-script';
+
+export const appHtml = `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Cue — configurable Telegram reminders, schedules and checklists.">
+  <title>Cue</title>
+  <style>${uiCss}</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><span class="brand-mark">C</span><span class="brand-copy">Cue<small>Reminder builder</small></span></div>
+    <div class="nav-label">Workspace</div>
+    <button class="nav-item active" data-view="dashboard" data-title="Dashboard"><span class="nav-icon">⌂</span>Dashboard</button>
+    <button class="nav-item" data-view="reminders" data-title="Reminders"><span class="nav-icon">◉</span>Reminders</button>
+    <button class="nav-item" data-view="runs" data-title="Runs & checklist"><span class="nav-icon">▷</span>Runs & checklist</button>
+    <button class="nav-item" data-view="clients" data-title="Clients"><span class="nav-icon">◎</span>Clients</button>
+    <button class="nav-item" data-view="messages" data-title="Messages"><span class="nav-icon">▤</span>Messages</button>
+    <button class="nav-item" data-view="aliases" data-title="Aliases"><span class="nav-icon">{ }</span>Aliases</button>
+    <div class="nav-label">Automation</div>
+    <button class="nav-item" data-view="conditions" data-title="Conditions"><span class="nav-icon">◇</span>Conditions</button>
+    <button class="nav-item" data-view="work" data-title="Work schedules"><span class="nav-icon">◷</span>Work schedules</button>
+    <button class="nav-item" data-view="deliveries" data-title="Deliveries"><span class="nav-icon">↗</span>Deliveries</button>
+    <div class="nav-label">System</div>
+    <button class="nav-item" data-view="settings" data-title="Settings"><span class="nav-icon">⚙︎</span>Settings</button>
+  </aside>
+
+  <div class="content">
+    <header class="topbar">
+      <div class="actions"><button class="mobile-menu" id="mobileMenu" aria-label="Open menu">☰</button><span class="crumb">Cue / <b id="currentTitle">Dashboard</b></span></div>
+      <div class="top-status"><span class="status-dot" id="topStatusDot"></span><span id="topStatusText">Checking runtime</span></div>
+    </header>
+
+    <main class="main">
+      <section class="view" id="dashboard">
+        <div class="page-head">
+          <div><h1 class="page-title">Dashboard</h1><p class="page-description">Configure Telegram reminders, review active runs and keep pending work moving.</p></div>
+          <button class="btn primary" id="timesheetPreset"><span>＋</span>Create timesheet preset</button>
+        </div>
+        <div class="grid stats">
+          <div class="card"><div class="stat-label">Active reminders</div><div class="stat-value" id="statReminders">—</div><div class="stat-foot">Enabled definitions</div></div>
+          <div class="card"><div class="stat-label">Active clients</div><div class="stat-value" id="statClients">—</div><div class="stat-foot">Telegram recipients</div></div>
+          <div class="card"><div class="stat-label">Pending checklist</div><div class="stat-value" id="statPending">—</div><div class="stat-foot">Items still open</div></div>
+          <div class="card"><div class="stat-label">Active runs</div><div class="stat-value" id="statRuns">—</div><div class="stat-foot">Current periods</div></div>
+        </div>
+        <div class="grid two" style="margin-top:14px">
+          <div class="card">
+            <div class="section-head"><div><h2>Runtime readiness</h2><p class="card-subtitle">Hosted configuration required for delivery.</p></div></div>
+            <div class="readiness" id="runtimeReadiness"></div>
+          </div>
+          <div class="card">
+            <div class="section-head"><div><h2>Quick setup</h2><p class="card-subtitle">The shortest path to a working reminder.</p></div></div>
+            <div class="quick-list">
+              <div class="quick-step"><span class="step-number">1</span><div><b>Add clients</b><span>Recipients and Telegram chat IDs</span></div></div>
+              <div class="quick-step"><span class="step-number">2</span><div><b>Create a message</b><span>Template, aliases and Telegram controls</span></div></div>
+              <div class="quick-step"><span class="step-number">3</span><div><b>Configure a reminder</b><span>Window, schedule, checklist and conditions</span></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div class="section-head"><div><h2>Recent runs</h2><p class="card-subtitle">Latest workflow periods and their state.</p></div><button class="btn small ghost" data-go="runs">View all</button></div>
+          <div class="table-wrap"><table class="table"><thead><tr><th>Reminder</th><th>Period</th><th>Status</th><th>Attempt</th></tr></thead><tbody id="dashboardRuns"></tbody></table></div>
+        </div>
+      </section>
+
+      <section class="view hidden" id="reminders">
+        <div class="page-head"><div><h1 class="page-title">Reminders</h1><p class="page-description">Trigger window, recipients, Work Schedule, pause rules and visual conditions in one reusable definition.</p></div><button class="btn primary" id="newReminder">＋ New reminder</button></div>
+        <div class="card" id="reminderEditor">
+          <div class="section-head"><div><h2 id="remEditorTitle">New reminder</h2><p class="card-subtitle">Weekly schedule is the current recurrence type.</p></div></div>
+          <div class="inline-fields">
+            <div class="field"><label>Name</label><input id="remName" placeholder="Weekly timesheet"></div>
+            <div class="field"><label>Priority</label><select id="remPriority"><option>low</option><option selected>normal</option><option>high</option><option>critical</option></select></div>
+          </div>
+          <div class="field"><label>Description</label><textarea id="remDescription" placeholder="What this reminder is responsible for"></textarea></div>
+          <div class="inline-fields">
+            <div class="field"><label>Message</label><select id="remTemplate"></select></div>
+            <div class="field"><label>Work schedule</label><select id="remWork"></select></div>
+          </div>
+          <div class="field"><label>Active weekdays</label><div class="day-checks" id="remDays"></div></div>
+          <div class="inline-fields four">
+            <div class="field"><label>Start</label><input id="remStart" type="time" value="14:00"></div>
+            <div class="field"><label>Stop</label><input id="remStop" type="time" value="18:00"></div>
+            <div class="field"><label>Repeat, min</label><input id="remRepeat" type="number" min="1" value="30"></div>
+            <div class="field"><label>Timezone</label><input id="remTimezone" value="Asia/Qyzylorda"></div>
+          </div>
+          <div class="field"><label>Recipients</label><div class="target-list" id="remTargets"></div></div>
+          <div class="section-head"><div><h2>Recurring pauses</h2><p class="card-subtitle">Quiet intervals inside the trigger window.</p></div><button class="btn small" id="addPauseRule">＋ Add pause</button></div>
+          <div class="list-editor" id="pauseRules"></div>
+          <div class="actions" style="margin-top:16px">
+            <label class="checkline"><input type="checkbox" id="remChecklist">Checklist mode</label>
+            <label class="checkline"><input type="checkbox" id="remUseRule" checked>Use current condition rule</label>
+            <label class="checkline"><input type="checkbox" id="remEnabled" checked>Enabled</label>
+          </div>
+          <div class="form-actions"><button class="btn ghost" id="cancelReminder">Reset</button><button class="btn primary" id="saveReminder">Save reminder</button></div>
+        </div>
+        <div class="card">
+          <div class="section-head"><div><h2>Saved reminders</h2><p class="card-subtitle">Open a definition to update any setting.</p></div></div>
+          <div class="table-wrap"><table class="table"><thead><tr><th>Name</th><th>Priority</th><th>Schedule</th><th>Checklist</th><th>Status</th><th></th></tr></thead><tbody id="reminderRows"></tbody></table></div>
+        </div>
+      </section>
+
+      <section class="view hidden" id="runs">
+        <div class="page-head"><div><h1 class="page-title">Runs & checklist</h1><p class="page-description">Operational state for each recurrence period. Pause, resume, stop or complete individual checklist items.</p></div><button class="btn" id="refreshRuns">↻ Refresh</button></div>
+        <div class="grid" id="runCards"></div>
+      </section>
+
+      <section class="view hidden" id="clients">
+        <div class="page-head"><div><h1 class="page-title">Clients</h1><p class="page-description">Telegram recipients with timezone, tags and custom fields for conditions.</p></div><button class="btn primary" id="newClient">＋ New client</button></div>
+        <div class="card">
+          <div class="section-head"><div><h2 id="clientEditorTitle">New client</h2><p class="card-subtitle">Chat ID is required for Telegram delivery.</p></div></div>
+          <div class="inline-fields">
+            <div class="field"><label>Display name</label><input id="clientName" placeholder="Ada Lovelace"></div>
+            <div class="field"><label>Telegram chat ID</label><input id="clientChat" placeholder="123456789"></div>
+          </div>
+          <div class="inline-fields three">
+            <div class="field"><label>Telegram user ID</label><input id="clientUser" placeholder="Optional"></div>
+            <div class="field"><label>Timezone</label><input id="clientTimezone" placeholder="Asia/Qyzylorda"></div>
+            <div class="field"><label>Tags</label><input id="clientTags" placeholder="team-a, manager"></div>
+          </div>
+          <div class="field"><label>Custom fields</label><textarea id="clientCustom" placeholder='{"department":"Engineering"}'></textarea><span class="field-hint">Optional key/value object used by conditions.</span></div>
+          <label class="checkline"><input type="checkbox" id="clientActive" checked>Active recipient</label>
+          <div class="form-actions"><button class="btn ghost" id="cancelClient">Reset</button><button class="btn primary" id="saveClient">Save client</button></div>
+        </div>
+        <div class="card"><div class="table-wrap"><table class="table"><thead><tr><th>Name</th><th>Chat ID</th><th>Timezone</th><th>Tags</th><th>Status</th><th></th></tr></thead><tbody id="clientRows"></tbody></table></div></div>
+      </section>
+
+      <section class="view hidden" id="messages">
+        <div class="page-head"><div><h1 class="page-title">Messages</h1><p class="page-description">Reusable Telegram templates with aliases, inline buttons, reply keyboards and request controls.</p></div><button class="btn primary" id="newTemplate">＋ New message</button></div>
+        <div class="grid two">
+          <div class="card">
+            <div class="section-head"><div><h2 id="templateEditorTitle">New message</h2><p class="card-subtitle">Use placeholders such as {{client.name}} and {{deadline}}.</p></div></div>
+            <div class="inline-fields">
+              <div class="field"><label>Name</label><input id="templateName" placeholder="Reminder"></div>
+              <div class="field"><label>Parse mode</label><select id="templateParse"><option>HTML</option><option>Markdown</option><option>MarkdownV2</option></select></div>
+            </div>
+            <div class="field"><label>Message text</label><textarea id="templateBody" style="min-height:190px">Hi {{client.name}}!\n\nPlease complete the task before {{deadline}}.\nRemaining: {{remaining_count}}.</textarea></div>
+            <div class="section-head"><div><h2>Telegram controls</h2><p class="card-subtitle">Rows and ordering are preserved.</p></div><button class="btn small" id="addControl">＋ Add control</button></div>
+            <div class="list-editor" id="controlRows"></div>
+            <div class="form-actions"><button class="btn ghost" id="cancelTemplate">Reset</button><button class="btn primary" id="saveTemplate">Save message</button></div>
+          </div>
+          <div>
+            <div class="card"><div class="section-head"><div><h2>Preview</h2><p class="card-subtitle">Example values are used for placeholders.</p></div></div><div class="preview" id="messagePreview"></div></div>
+            <div class="card"><div class="section-head"><div><h2>Saved messages</h2></div></div><div id="templateList"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view hidden" id="aliases">
+        <div class="page-head"><div><h1 class="page-title">Aliases</h1><p class="page-description">Global reusable values available as {{alias_name}} in every message.</p></div></div>
+        <div class="card">
+          <div class="inline-fields"><div class="field"><label>Alias</label><input id="aliasKey" placeholder="company_name"></div><div class="field"><label>Value</label><input id="aliasValue" placeholder="Acme"></div></div>
+          <div class="form-actions"><button class="btn primary" id="saveAlias">Save alias</button></div>
+        </div>
+        <div class="card"><div class="table-wrap"><table class="table"><thead><tr><th>Placeholder</th><th>Value</th><th></th></tr></thead><tbody id="aliasRows"></tbody></table></div></div>
+      </section>
+
+      <section class="view hidden" id="conditions">
+        <div class="page-head"><div><h1 class="page-title">Conditions</h1><p class="page-description">Build nested ALL/ANY rules and configure multiple THEN/ELSE actions without editing JSON.</p></div><div class="actions"><button class="btn" id="addRootCondition">＋ Condition</button><button class="btn" id="addRootGroup">＋ Group</button></div></div>
+        <div class="grid two">
+          <div class="card">
+            <div class="section-head"><div><h2>WHEN</h2><p class="card-subtitle">Conditions can be nested up to eight levels.</p></div></div>
+            <div class="rule-tree" id="conditionTree"></div>
+            <div class="divider"></div>
+            <div class="section-head"><div><h2>THEN</h2></div><button class="btn small" data-add-action="then">＋ Action</button></div>
+            <div class="list-editor" id="thenActions"></div>
+            <div class="divider"></div>
+            <div class="section-head"><div><h2>ELSE</h2></div><button class="btn small" data-add-action="else">＋ Action</button></div>
+            <div class="list-editor" id="elseActions"></div>
+            <div class="form-actions"><span class="muted" id="conditionValidity"></span><button class="btn primary" id="validateCondition">Validate rule</button></div>
+          </div>
+          <div class="card">
+            <div class="tabs"><button class="tab active" data-condition-tab="readable">Readable</button><button class="tab" data-condition-tab="json">JSON preview</button></div>
+            <pre class="preview" id="conditionReadable"></pre><pre class="preview hidden" id="conditionJson"></pre>
+          </div>
+        </div>
+      </section>
+
+      <section class="view hidden" id="work">
+        <div class="page-head"><div><h1 class="page-title">Work schedules</h1><p class="page-description">Reusable weekly availability with half-hour precision, split intervals and date exceptions.</p></div><button class="btn primary" id="newWork">＋ New schedule</button></div>
+        <div class="card">
+          <div class="section-head"><div><h2 id="workEditorTitle">New schedule</h2><p class="card-subtitle">Drag across cells to add or remove working time.</p></div></div>
+          <div class="inline-fields"><div class="field"><label>Name</label><input id="workName" value="Default work schedule"></div><div class="field"><label>Timezone</label><input id="workTimezone" value="Asia/Qyzylorda"></div></div>
+          <label class="checkline"><input type="checkbox" id="workDefault">Default schedule</label>
+          <div class="divider"></div>
+          <div class="schedule-toolbar">
+            <select id="copyFrom"></select><span class="muted" style="align-self:center">to</span><select id="copyTo"></select><button class="btn small" id="copyDay">Copy day</button>
+            <select id="clearDay"></select><button class="btn small" id="clearSelectedDay">Clear day</button>
+          </div>
+          <div class="schedule-scroll"><div class="week-grid" id="weekGrid"></div></div>
+          <div class="divider"></div>
+          <div class="section-head"><div><h2>Date exceptions</h2><p class="card-subtitle">Holidays and special working days.</p></div><button class="btn small" id="addException">＋ Exception</button></div>
+          <div id="exceptionRows"></div>
+          <div class="form-actions"><button class="btn ghost" id="cancelWork">Reset</button><button class="btn primary" id="saveWork">Save schedule</button></div>
+        </div>
+        <div class="card"><div class="table-wrap"><table class="table"><thead><tr><th>Name</th><th>Timezone</th><th>Default</th><th></th></tr></thead><tbody id="workRows"></tbody></table></div></div>
+      </section>
+
+      <section class="view hidden" id="deliveries">
+        <div class="page-head"><div><h1 class="page-title">Deliveries</h1><p class="page-description">Recent Telegram sends, failures and rendered messages.</p></div><button class="btn" id="refreshDeliveries">↻ Refresh</button></div>
+        <div class="card"><div class="table-wrap"><table class="table"><thead><tr><th>Time</th><th>Reminder</th><th>Client</th><th>Status</th><th>Message</th></tr></thead><tbody id="deliveryRows"></tbody></table></div></div>
+      </section>
+
+      <section class="view hidden" id="settings">
+        <div class="page-head"><div><h1 class="page-title">Settings</h1><p class="page-description">Bot identity, parse mode, timezone and Telegram commands.</p></div></div>
+        <div class="grid two">
+          <div class="card">
+            <div class="section-head"><div><h2>Bot configuration</h2><p class="card-subtitle">Secrets remain in hosted runtime settings.</p></div></div>
+            <div class="inline-fields"><div class="field"><label>Name</label><input id="botName" value="Cue"></div><div class="field"><label>Username</label><input id="botUsername" placeholder="cue_bot"></div></div>
+            <div class="inline-fields"><div class="field"><label>Default parse mode</label><select id="botParse"><option>HTML</option><option>Markdown</option><option>MarkdownV2</option></select></div><div class="field"><label>Timezone</label><input id="botTimezone" value="Asia/Qyzylorda"></div></div>
+            <label class="checkline"><input type="checkbox" id="botEnabled" checked>Bot enabled</label>
+            <div class="divider"></div>
+            <div class="section-head"><div><h2>Commands</h2><p class="card-subtitle">Command names omit the leading slash.</p></div><button class="btn small" id="addCommand">＋ Command</button></div>
+            <div class="list-editor" id="commandRows"></div>
+            <div class="form-actions"><button class="btn" id="syncCommands">Sync to Telegram</button><button class="btn primary" id="saveBotConfig">Save settings</button></div>
+          </div>
+          <div class="card">
+            <div class="section-head"><div><h2>Deployment status</h2><p class="card-subtitle">No secret values are displayed.</p></div></div>
+            <div class="readiness" id="settingsReadiness"></div>
+            <div class="callout" style="margin-top:16px"><strong>Private deployment</strong><br>The admin interface remains owner-only. Telegram webhook and scheduler traffic need a separate public integration surface before live automation can run.</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+<div class="toast hidden" id="toast"></div>
+<script>${uiScript}</script>
+</body>
+</html>`;

@@ -96,4 +96,10 @@ If Friday work ends at 18:00 in the selected Work Schedule, reminders automatica
 
 ## Current MVP scope
 
-The engine, visual Work Schedule editor, reminder editor, conditions builder, Telegram webhook, scheduler, manual run/checklist controls and timesheet preset are implemented. Product-level extensions include richer Telegram-control configuration, delivery analytics, authentication/roles for public deployments and recurrence types beyond weekly schedules.
+The engine, visual Work Schedule editor, editable reminders/clients/messages, nested conditions builder, executable THEN/ELSE actions, Telegram-control renderer, delivery history, bot settings, manual run/checklist controls and idempotent timesheet preset are implemented.
+
+The hosted runtime still needs `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET` and `CRON_SECRET` before Telegram delivery can run. An external scheduler must call `/api/cron/tick` on a regular cadence.
+
+The current ChatGPT Sites deployment is owner-only. That is appropriate for the administration interface, but the same access policy also protects the webhook and scheduler routes. A production Telegram integration therefore needs a separate public integration worker (protected by the Telegram and cron secrets) or another explicitly approved route-level authentication design. Do not make the whole administration interface public as a shortcut.
+
+Product-level extensions still include application roles for shared deployments and recurrence types beyond weekly schedules.
