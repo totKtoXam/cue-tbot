@@ -1,10 +1,10 @@
 # Cue
 
-Cue is a configurable Telegram reminder and automation engine with a visual conditions builder. The weekly timesheet scenario is included as a preset, not hard-coded product behavior.
+Cue is a configurable Telegram reminder and automation engine with a visual conditions builder. Product behavior is assembled from reusable entities rather than scenario-specific presets.
 
 ## Core concepts
 
-- **Reminder Definition** — reusable trigger window, Work Schedule, template, targeting, conditions and pause rules.
+- **Reminder Definition** — a one-time, recurring or ongoing trigger with Work Schedule, template, targeting, conditions and typed pause rules.
 - **Reminder Run** — one recurrence-period execution with attempts, checklist state, pause/stop state and delivery history.
 - **Work Schedule** — reusable built-in weekly schedule with multiple intervals per day, timezone and date exceptions.
 - **Clients** — Telegram recipients.
@@ -77,29 +77,12 @@ Authorization: Bearer <CRON_SECRET>
 
 A one-minute cadence is a practical default. Each Reminder Definition decides whether it is actually due.
 
-## Timesheet preset
-
-The preset creates:
-
-- Friday evaluation starting at 14:00;
-- 30-minute retry interval;
-- high priority;
-- all currently active clients as targets;
-- checklist mode;
-- default Work Schedule assignment;
-- condition: pending count > 0 AND `schedule.isWorkingTime = true`;
-- notifications only to pending employees;
-- a per-item **Done** Telegram callback;
-- completion when all checklist items are done or the run is manually stopped.
-
-If Friday work ends at 18:00 in the selected Work Schedule, reminders automatically stop being sent after 18:00 even though the reminder trigger window may remain open longer.
-
 ## Current MVP scope
 
-The engine, visual Work Schedule editor, editable reminders/clients/messages, nested conditions builder, executable THEN/ELSE actions, Telegram-control renderer, delivery history, bot settings, manual run/checklist controls and idempotent timesheet preset are implemented.
+The engine, adaptive reminder editor, visual Work Schedule editor, editable reminders/clients/messages, nested conditions builder, executable THEN/ELSE actions, Telegram-control renderer, delivery history, bot settings and manual run/checklist controls are implemented. The administration interface supports Russian and English, light and dark themes, searchable/filterable/paginated collections, guarded destructive actions and request loading states.
 
 The hosted runtime still needs `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET` and `CRON_SECRET` before Telegram delivery can run. An external scheduler must call `/api/cron/tick` on a regular cadence.
 
 The current ChatGPT Sites deployment is owner-only. That is appropriate for the administration interface, but the same access policy also protects the webhook and scheduler routes. A production Telegram integration therefore needs a separate public integration worker (protected by the Telegram and cron secrets) or another explicitly approved route-level authentication design. Do not make the whole administration interface public as a shortcut.
 
-Product-level extensions still include application roles for shared deployments and recurrence types beyond weekly schedules.
+Product-level extensions still include application roles for shared deployments and event-triggered reminders fed by external integrations.
