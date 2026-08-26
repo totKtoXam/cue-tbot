@@ -2,232 +2,65 @@ import { uiCss } from './ui-css';
 import { uiScript } from './ui-script';
 
 export const appHtml = `<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Cue — configurable Telegram reminders, schedules and checklists.">
-  <title>Cue</title>
-  <style>${uiCss}</style>
-</head>
-<body>
-<div class="app">
+<html lang="ru" data-theme="dark">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Cue — configurable Telegram reminders, schedules and checklists."><meta name="theme-color" content="#0d0e10"><title>Cue</title><style>${uiCss}</style></head>
+<body><div class="app">
   <aside class="sidebar" id="sidebar">
-    <div class="brand"><span class="brand-mark">C</span><span class="brand-copy">Cue<small>Reminder builder</small></span></div>
-    <div class="nav-label">Workspace</div>
-    <button class="nav-item active" data-view="dashboard" data-title="Dashboard"><span class="nav-icon">⌂</span>Dashboard</button>
-    <button class="nav-item" data-view="reminders" data-title="Reminders"><span class="nav-icon">◉</span>Reminders</button>
-    <button class="nav-item" data-view="runs" data-title="Runs & checklist"><span class="nav-icon">▷</span>Runs & checklist</button>
-    <button class="nav-item" data-view="clients" data-title="Clients"><span class="nav-icon">◎</span>Clients</button>
-    <button class="nav-item" data-view="messages" data-title="Messages"><span class="nav-icon">▤</span>Messages</button>
-    <button class="nav-item" data-view="aliases" data-title="Aliases"><span class="nav-icon">{ }</span>Aliases</button>
-    <div class="nav-label">Automation</div>
-    <button class="nav-item" data-view="conditions" data-title="Conditions"><span class="nav-icon">◇</span>Conditions</button>
-    <button class="nav-item" data-view="work" data-title="Work schedules"><span class="nav-icon">◷</span>Work schedules</button>
-    <button class="nav-item" data-view="deliveries" data-title="Deliveries"><span class="nav-icon">↗</span>Deliveries</button>
-    <div class="nav-label">System</div>
-    <button class="nav-item" data-view="settings" data-title="Settings"><span class="nav-icon">⚙︎</span>Settings</button>
+    <div class="brand"><span class="brand-mark" aria-label="Cue"><i></i></span><span class="brand-copy">Cue<small data-i18n="brandTagline">Reminder builder</small></span></div>
+    <div class="nav-label" data-i18n="workspace">Workspace</div>
+    <button class="nav-item active" data-view="dashboard" data-title-key="dashboard"><span class="nav-icon">⌂</span><span data-i18n="dashboard">Dashboard</span></button>
+    <button class="nav-item" data-view="reminders" data-title-key="reminders"><span class="nav-icon">◉</span><span data-i18n="reminders">Reminders</span></button>
+    <button class="nav-item" data-view="runs" data-title-key="runs"><span class="nav-icon">▷</span><span data-i18n="runs">Runs & checklist</span></button>
+    <button class="nav-item" data-view="clients" data-title-key="clients"><span class="nav-icon">◎</span><span data-i18n="clients">Clients</span></button>
+    <button class="nav-item" data-view="messages" data-title-key="messages"><span class="nav-icon">▤</span><span data-i18n="messages">Messages</span></button>
+    <button class="nav-item" data-view="aliases" data-title-key="aliases"><span class="nav-icon">{ }</span><span data-i18n="aliases">Aliases</span></button>
+    <div class="nav-label" data-i18n="automation">Automation</div>
+    <button class="nav-item" data-view="conditions" data-title-key="conditions"><span class="nav-icon">◇</span><span data-i18n="conditions">Conditions</span></button>
+    <button class="nav-item" data-view="work" data-title-key="workSchedules"><span class="nav-icon">◷</span><span data-i18n="workSchedules">Work schedules</span></button>
+    <button class="nav-item" data-view="deliveries" data-title-key="deliveries"><span class="nav-icon">↗</span><span data-i18n="deliveries">Deliveries</span></button>
+    <div class="nav-label" data-i18n="system">System</div>
+    <button class="nav-item" data-view="settings" data-title-key="settings"><span class="nav-icon">⚙︎</span><span data-i18n="settings">Settings</span></button>
   </aside>
-
-  <div class="content">
-    <header class="topbar">
-      <div class="actions"><button class="mobile-menu" id="mobileMenu" aria-label="Open menu">☰</button><span class="crumb">Cue / <b id="currentTitle">Dashboard</b></span></div>
-      <div class="top-status"><span class="status-dot" id="topStatusDot"></span><span id="topStatusText">Checking runtime</span></div>
-    </header>
-
+  <div class="content"><header class="topbar"><div class="actions"><button class="mobile-menu" id="mobileMenu" aria-label="Menu">☰</button><span class="crumb">Cue / <b id="currentTitle">Dashboard</b></span></div><div class="top-actions"><div class="language-switch" aria-label="Language"><button id="langRu">RU</button><button id="langEn">EN</button></div><button class="icon-button" id="themeToggle" aria-label="Theme"><span class="theme-icon">☼</span></button><div class="top-status"><span class="status-dot" id="topStatusDot"></span><span id="topStatusText">Setup required</span></div></div></header>
     <main class="main">
-      <section class="view" id="dashboard">
-        <div class="page-head">
-          <div><h1 class="page-title">Dashboard</h1><p class="page-description">Configure Telegram reminders, review active runs and keep pending work moving.</p></div>
-          <button class="btn primary" id="timesheetPreset"><span>＋</span>Create timesheet preset</button>
-        </div>
-        <div class="grid stats">
-          <div class="card"><div class="stat-label">Active reminders</div><div class="stat-value" id="statReminders">—</div><div class="stat-foot">Enabled definitions</div></div>
-          <div class="card"><div class="stat-label">Active clients</div><div class="stat-value" id="statClients">—</div><div class="stat-foot">Telegram recipients</div></div>
-          <div class="card"><div class="stat-label">Pending checklist</div><div class="stat-value" id="statPending">—</div><div class="stat-foot">Items still open</div></div>
-          <div class="card"><div class="stat-label">Active runs</div><div class="stat-value" id="statRuns">—</div><div class="stat-foot">Current periods</div></div>
-        </div>
-        <div class="grid two" style="margin-top:14px">
-          <div class="card">
-            <div class="section-head"><div><h2>Runtime readiness</h2><p class="card-subtitle">Hosted configuration required for delivery.</p></div></div>
-            <div class="readiness" id="runtimeReadiness"></div>
-          </div>
-          <div class="card">
-            <div class="section-head"><div><h2>Quick setup</h2><p class="card-subtitle">The shortest path to a working reminder.</p></div></div>
-            <div class="quick-list">
-              <div class="quick-step"><span class="step-number">1</span><div><b>Add clients</b><span>Recipients and Telegram chat IDs</span></div></div>
-              <div class="quick-step"><span class="step-number">2</span><div><b>Create a message</b><span>Template, aliases and Telegram controls</span></div></div>
-              <div class="quick-step"><span class="step-number">3</span><div><b>Configure a reminder</b><span>Window, schedule, checklist and conditions</span></div></div>
-            </div>
-          </div>
-        </div>
-        <div class="card" style="margin-top:14px">
-          <div class="section-head"><div><h2>Recent runs</h2><p class="card-subtitle">Latest workflow periods and their state.</p></div><button class="btn small ghost" data-go="runs">View all</button></div>
-          <div class="table-wrap"><table class="table"><thead><tr><th>Reminder</th><th>Period</th><th>Status</th><th>Attempt</th></tr></thead><tbody id="dashboardRuns"></tbody></table></div>
-        </div>
+      <section class="view" id="dashboard"><div class="page-head"><div><h1 class="page-title" data-i18n="dashboard">Dashboard</h1><p class="page-description" data-i18n="dashboardDescription">A clear view of reminders, recipients and work still in progress.</p></div><button class="btn primary" data-go="reminders" id="dashboardNewReminder">＋ <span data-i18n="newReminder">New reminder</span></button></div>
+        <div class="grid stats"><div class="card stat-card"><div class="stat-icon">◉</div><div><div class="stat-label" data-i18n="activeReminders">Active reminders</div><div class="stat-value" id="statReminders">—</div><div class="stat-foot" data-i18n="enabledDefinitions">Enabled definitions</div></div></div><div class="card stat-card"><div class="stat-icon">◎</div><div><div class="stat-label" data-i18n="activeClients">Active clients</div><div class="stat-value" id="statClients">—</div><div class="stat-foot" data-i18n="telegramRecipients">Telegram recipients</div></div></div><div class="card stat-card"><div class="stat-icon">✓</div><div><div class="stat-label" data-i18n="pendingChecklist">Pending checklist</div><div class="stat-value" id="statPending">—</div><div class="stat-foot" data-i18n="itemsStillOpen">Items still open</div></div></div><div class="card stat-card"><div class="stat-icon">▷</div><div><div class="stat-label" data-i18n="activeRuns">Active runs</div><div class="stat-value" id="statRuns">—</div><div class="stat-foot" data-i18n="currentPeriods">Current periods</div></div></div></div>
+        <div class="grid two dashboard-grid"><div class="card"><div class="section-head"><div><h2 data-i18n="runtimeReadiness">Runtime readiness</h2><p class="card-subtitle" data-i18n="runtimeHint">Hosted configuration required for delivery.</p></div></div><div class="readiness" id="runtimeReadiness"></div></div><div class="card"><div class="section-head"><div><h2 data-i18n="quickSetup">Quick setup</h2><p class="card-subtitle" data-i18n="quickSetupHint">Three reusable building blocks, no scenario-specific presets.</p></div></div><div class="quick-grid"><button class="quick-tile" data-go="clients"><span>◎</span><b data-i18n="addClients">Add clients</b><small data-i18n="addClientsHint">Recipients and chat IDs</small></button><button class="quick-tile" data-go="messages"><span>▤</span><b data-i18n="createMessage">Create a message</b><small data-i18n="createMessageHint">Text, aliases and controls</small></button><button class="quick-tile" data-go="reminders"><span>◉</span><b data-i18n="configureReminder">Configure reminder</b><small data-i18n="configureReminderHint">Schedule, recipients and rules</small></button></div></div></div>
       </section>
 
-      <section class="view hidden" id="reminders">
-        <div class="page-head"><div><h1 class="page-title">Reminders</h1><p class="page-description">Trigger window, recipients, Work Schedule, pause rules and visual conditions in one reusable definition.</p></div><button class="btn primary" id="newReminder">＋ New reminder</button></div>
-        <div class="card" id="reminderEditor">
-          <div class="section-head"><div><h2 id="remEditorTitle">New reminder</h2><p class="card-subtitle">Weekly schedule is the current recurrence type.</p></div></div>
-          <div class="inline-fields">
-            <div class="field"><label>Name</label><input id="remName" placeholder="Weekly timesheet"></div>
-            <div class="field"><label>Priority</label><select id="remPriority"><option>low</option><option selected>normal</option><option>high</option><option>critical</option></select></div>
-          </div>
-          <div class="field"><label>Description</label><textarea id="remDescription" placeholder="What this reminder is responsible for"></textarea></div>
-          <div class="inline-fields">
-            <div class="field"><label>Message</label><select id="remTemplate"></select></div>
-            <div class="field"><label>Work schedule</label><select id="remWork"></select></div>
-          </div>
-          <div class="field"><label>Active weekdays</label><div class="day-checks" id="remDays"></div></div>
-          <div class="inline-fields four">
-            <div class="field"><label>Start</label><input id="remStart" type="time" value="14:00"></div>
-            <div class="field"><label>Stop</label><input id="remStop" type="time" value="18:00"></div>
-            <div class="field"><label>Repeat, min</label><input id="remRepeat" type="number" min="1" value="30"></div>
-            <div class="field"><label>Timezone</label><input id="remTimezone" value="Asia/Qyzylorda"></div>
-          </div>
-          <div class="field"><label>Recipients</label><div class="target-list" id="remTargets"></div></div>
-          <div class="section-head"><div><h2>Recurring pauses</h2><p class="card-subtitle">Quiet intervals inside the trigger window.</p></div><button class="btn small" id="addPauseRule">＋ Add pause</button></div>
-          <div class="list-editor" id="pauseRules"></div>
-          <div class="actions" style="margin-top:16px">
-            <label class="checkline"><input type="checkbox" id="remChecklist">Checklist mode</label>
-            <label class="checkline"><input type="checkbox" id="remUseRule" checked>Use current condition rule</label>
-            <label class="checkline"><input type="checkbox" id="remEnabled" checked>Enabled</label>
-          </div>
-          <div class="form-actions"><button class="btn ghost" id="cancelReminder">Reset</button><button class="btn primary" id="saveReminder">Save reminder</button></div>
-        </div>
-        <div class="card">
-          <div class="section-head"><div><h2>Saved reminders</h2><p class="card-subtitle">Open a definition to update any setting.</p></div></div>
-          <div class="table-wrap"><table class="table"><thead><tr><th>Name</th><th>Priority</th><th>Schedule</th><th>Checklist</th><th>Status</th><th></th></tr></thead><tbody id="reminderRows"></tbody></table></div>
-        </div>
+      <section class="view hidden" id="reminders"><div class="page-head"><div><h1 class="page-title" data-i18n="reminders">Reminders</h1><p class="page-description" data-i18n="remindersDescription">One-time, recurring and ongoing reminders with fields that adapt to the selected type.</p></div><button class="btn primary" id="newReminder">＋ <span data-i18n="newReminder">New reminder</span></button></div>
+        <div class="card editor-card" id="reminderEditor"><div class="section-head"><div><h2 id="remEditorTitle" data-i18n="newReminder">New reminder</h2><p class="card-subtitle" data-i18n="reminderEditorHint">Choose a type first — only relevant settings will remain visible.</p></div></div>
+          <div class="type-cards" id="remTypeCards"><label><input type="radio" name="remType" value="once"><span><b data-i18n="typeOnce">One-time</b><small data-i18n="typeOnceHint">Runs once on a selected date</small></span></label><label><input type="radio" name="remType" value="recurring" checked><span><b data-i18n="typeRecurring">Recurring</b><small data-i18n="typeRecurringHint">Repeats on selected weekdays</small></span></label><label><input type="radio" name="remType" value="ongoing"><span><b data-i18n="typeOngoing">Ongoing</b><small data-i18n="typeOngoingHint">Keeps working until stopped or completed</small></span></label></div>
+          <div class="editor-layout"><div class="editor-main">
+            <div class="form-grid three"><div class="field span-2"><label data-i18n="name">Name</label><input id="remName" data-i18n-placeholder="reminderNamePlaceholder"></div><div class="field"><label data-i18n="priority">Priority</label><select id="remPriority"><option value="low">Low</option><option value="normal" selected>Normal</option><option value="high">High</option><option value="critical">Critical</option></select></div></div><div class="field"><label data-i18n="description">Description</label><textarea id="remDescription" data-i18n-placeholder="descriptionPlaceholder"></textarea></div>
+            <div class="form-grid two"><div class="field"><label data-i18n="message">Message</label><div class="relation-field"><select id="remTemplate"></select><button class="btn icon" id="createMessageInline" title="Create message">＋</button></div></div><div class="field"><label data-i18n="workSchedule">Work schedule</label><div class="relation-field"><select id="remWork"></select><button class="btn icon" id="createWorkInline" title="Create schedule">＋</button></div></div></div>
+            <div class="form-grid two only-once"><div class="field"><label data-i18n="runDate">Run date</label><input id="remDate" type="date"></div><div class="field"><label data-i18n="timezone">Timezone</label><input id="remTimezone" value="Asia/Qyzylorda"></div></div>
+            <div class="only-recurring"><div class="section-row"><span class="field-label" data-i18n="activeWeekdays">Active weekdays</span><div class="segmented" id="dayPresets"><button data-day-preset="workdays" data-i18n="workdays">Workdays</button><button data-day-preset="all" data-i18n="everyDay">Every day</button><button data-day-preset="weekends" data-i18n="weekends">Weekends</button><button data-day-preset="custom" data-i18n="custom">Custom</button></div></div><div class="day-checks" id="remDays"></div></div>
+            <div class="time-section only-scheduled"><div class="section-row"><div><span class="field-label" data-i18n="activeWindow">Active window</span><p class="field-hint" data-i18n="activeWindowHint">Drag the wheels or use the arrows.</p></div><label class="switchline"><input type="checkbox" id="remAllDay"><span></span><em data-i18n="allDay">All day</em></label></div><div class="time-wheel-grid" id="remTimeWindow"><div class="time-field"><label data-i18n="start">Start</label><div id="remStartWheel"></div></div><div class="time-field"><label data-i18n="stop">Stop</label><div id="remStopWheel"></div></div></div></div>
+            <div class="repeat-section only-repeat"><span class="field-label" data-i18n="repeat">Repeat</span><p class="field-hint" data-i18n="repeatHint">At least 10 minutes. Combine hours and minutes without mental arithmetic.</p><div class="duration-composer"><button class="duration-step" data-repeat-adjust="-10">−</button><div class="duration-unit"><input id="repeatHours" type="number" min="0" max="168" value="0"><span data-i18n="hours">hours</span></div><span class="duration-colon">:</span><div class="duration-unit"><input id="repeatMinutes" type="number" min="0" max="59" step="10" value="30"><span data-i18n="minutes">minutes</span></div><button class="duration-step" data-repeat-adjust="10">＋</button><strong id="repeatSummary">30 min</strong></div><div class="quick-values"><button data-repeat-total="10">10m</button><button data-repeat-total="30">30m</button><button data-repeat-total="60">1h</button><button data-repeat-total="120">2h</button></div></div>
+            <div class="recipients-section"><div class="section-row"><div><span class="field-label" data-i18n="recipients">Recipients</span><p class="field-hint"><span id="recipientCount">0</span> <span data-i18n="selected">selected</span></p></div><div class="actions"><button class="btn small" id="selectAllRecipients" data-i18n="selectAll">Select all</button><button class="btn small ghost" id="clearRecipients" data-i18n="clear">Clear</button></div></div><div class="list-toolbar compact"><label class="searchbox"><span>⌕</span><input id="recipientSearch" data-i18n-placeholder="searchRecipients"></label><select id="recipientFilter"><option value="all" data-i18n="all">All</option><option value="active" data-i18n="active">Active</option><option value="inactive" data-i18n="inactive">Inactive</option></select></div><div class="recipient-grid" id="remTargets"></div><div class="pager" id="recipientPager"></div></div>
+            <div class="pause-section"><div class="section-head"><div><h2 data-i18n="recurringPauses">Pauses</h2><p class="card-subtitle" data-i18n="pausesHint">Pause by weekday, exact date or date range.</p></div><button class="btn small" id="addPauseRule">＋ <span data-i18n="addPause">Add pause</span></button></div><div class="pause-cards" id="pauseRules"></div></div>
+          </div><aside class="editor-side"><div class="side-panel"><h3 data-i18n="behavior">Behavior</h3><label class="option-row"><input type="checkbox" id="remChecklist"><span><b data-i18n="checklistMode">Checklist mode</b><small data-i18n="checklistHint">Repeat only for unfinished recipients</small></span></label><label class="option-row"><input type="checkbox" id="remUseRule" checked><span><b data-i18n="useConditions">Use conditions</b><small data-i18n="conditionsHint">Apply the current WHEN / THEN rule</small></span></label><label class="option-row"><input type="checkbox" id="remEnabled" checked><span><b data-i18n="enabled">Enabled</b><small data-i18n="enabledHint">Scheduler may start this reminder</small></span></label></div><div class="side-panel summary-panel"><h3 data-i18n="summary">Summary</h3><div id="reminderSummary"></div></div></aside></div>
+          <div class="form-actions"><button class="btn ghost" id="cancelReminder" data-i18n="reset">Reset</button><button class="btn primary" id="saveReminder" data-i18n="saveReminder">Save reminder</button></div></div>
+        <div class="card"><div class="section-head"><div><h2 data-i18n="savedReminders">Saved reminders</h2><p class="card-subtitle" data-i18n="savedRemindersHint">Search, filter and open any definition.</p></div></div><div class="list-toolbar"><label class="searchbox"><span>⌕</span><input id="reminderSearch" data-i18n-placeholder="search"></label><select id="reminderFilter"><option value="all" data-i18n="all">All</option><option value="enabled" data-i18n="enabled">Enabled</option><option value="disabled" data-i18n="disabled">Disabled</option><option value="once" data-i18n="typeOnce">One-time</option><option value="recurring" data-i18n="typeRecurring">Recurring</option><option value="ongoing" data-i18n="typeOngoing">Ongoing</option></select></div><div class="table-wrap"><table class="table"><thead><tr><th data-i18n="name">Name</th><th data-i18n="type">Type</th><th data-i18n="priority">Priority</th><th data-i18n="schedule">Schedule</th><th data-i18n="status">Status</th><th></th></tr></thead><tbody id="reminderRows"></tbody></table></div><div class="pager" id="reminderPager"></div></div>
       </section>
 
-      <section class="view hidden" id="runs">
-        <div class="page-head"><div><h1 class="page-title">Runs & checklist</h1><p class="page-description">Operational state for each recurrence period. Pause, resume, stop or complete individual checklist items.</p></div><button class="btn" id="refreshRuns">↻ Refresh</button></div>
-        <div class="grid" id="runCards"></div>
-      </section>
+      <section class="view hidden" id="runs"><div class="page-head"><div><h1 class="page-title" data-i18n="runs">Runs & checklist</h1><p class="page-description" data-i18n="runsDescription">Operational periods, pauses and checklist progress.</p></div><button class="btn" id="refreshRuns">↻ <span data-i18n="refresh">Refresh</span></button></div><div class="list-toolbar"><label class="searchbox"><span>⌕</span><input id="runSearch" data-i18n-placeholder="search"></label><select id="runFilter"><option value="all" data-i18n="all">All</option><option value="active" data-i18n="active">Active</option><option value="completed" data-i18n="completed">Completed</option><option value="stopped" data-i18n="stopped">Stopped</option></select></div><div class="grid" id="runCards"></div><div class="pager" id="runPager"></div></section>
 
-      <section class="view hidden" id="clients">
-        <div class="page-head"><div><h1 class="page-title">Clients</h1><p class="page-description">Telegram recipients with timezone, tags and custom fields for conditions.</p></div><button class="btn primary" id="newClient">＋ New client</button></div>
-        <div class="card">
-          <div class="section-head"><div><h2 id="clientEditorTitle">New client</h2><p class="card-subtitle">Chat ID is required for Telegram delivery.</p></div></div>
-          <div class="inline-fields">
-            <div class="field"><label>Display name</label><input id="clientName" placeholder="Ada Lovelace"></div>
-            <div class="field"><label>Telegram chat ID</label><input id="clientChat" placeholder="123456789"></div>
-          </div>
-          <div class="inline-fields three">
-            <div class="field"><label>Telegram user ID</label><input id="clientUser" placeholder="Optional"></div>
-            <div class="field"><label>Timezone</label><input id="clientTimezone" placeholder="Asia/Qyzylorda"></div>
-            <div class="field"><label>Tags</label><input id="clientTags" placeholder="team-a, manager"></div>
-          </div>
-          <div class="field"><label>Custom fields</label><textarea id="clientCustom" placeholder='{"department":"Engineering"}'></textarea><span class="field-hint">Optional key/value object used by conditions.</span></div>
-          <label class="checkline"><input type="checkbox" id="clientActive" checked>Active recipient</label>
-          <div class="form-actions"><button class="btn ghost" id="cancelClient">Reset</button><button class="btn primary" id="saveClient">Save client</button></div>
-        </div>
-        <div class="card"><div class="table-wrap"><table class="table"><thead><tr><th>Name</th><th>Chat ID</th><th>Timezone</th><th>Tags</th><th>Status</th><th></th></tr></thead><tbody id="clientRows"></tbody></table></div></div>
-      </section>
+      <section class="view hidden" id="clients"><div class="page-head"><div><h1 class="page-title" data-i18n="clients">Clients</h1><p class="page-description" data-i18n="clientsDescription">Telegram recipients with tags and fields for conditions.</p></div><button class="btn primary" id="newClient">＋ <span data-i18n="newClient">New client</span></button></div><div class="card editor-card"><div class="section-head"><div><h2 id="clientEditorTitle" data-i18n="newClient">New client</h2><p class="card-subtitle" data-i18n="clientEditorHint">Identity and delivery settings fit in one compact grid.</p></div></div><div class="form-grid three"><div class="field"><label data-i18n="displayName">Display name</label><input id="clientName"></div><div class="field"><label data-i18n="telegramChatId">Telegram chat ID</label><input id="clientChat"></div><div class="field"><label data-i18n="telegramUserId">Telegram user ID</label><input id="clientUser"></div><div class="field"><label data-i18n="timezone">Timezone</label><input id="clientTimezone"></div><div class="field span-2"><label data-i18n="tags">Tags</label><input id="clientTags"></div><div class="field span-2"><label data-i18n="customFields">Custom fields</label><textarea id="clientCustom" placeholder='{"department":"Engineering"}'></textarea></div><label class="option-row compact-option"><input type="checkbox" id="clientActive" checked><span><b data-i18n="activeRecipient">Active recipient</b></span></label></div><div class="form-actions"><button class="btn ghost" id="cancelClient" data-i18n="reset">Reset</button><button class="btn primary" id="saveClient" data-i18n="saveClient">Save client</button></div></div><div class="card"><div class="list-toolbar"><label class="searchbox"><span>⌕</span><input id="clientSearch" data-i18n-placeholder="search"></label><select id="clientFilter"><option value="all" data-i18n="all">All</option><option value="active" data-i18n="active">Active</option><option value="inactive" data-i18n="inactive">Inactive</option></select></div><div class="table-wrap"><table class="table"><thead><tr><th data-i18n="name">Name</th><th>Chat ID</th><th data-i18n="timezone">Timezone</th><th data-i18n="tags">Tags</th><th data-i18n="status">Status</th><th></th></tr></thead><tbody id="clientRows"></tbody></table></div><div class="pager" id="clientPager"></div></div></section>
 
-      <section class="view hidden" id="messages">
-        <div class="page-head"><div><h1 class="page-title">Messages</h1><p class="page-description">Reusable Telegram templates with aliases, inline buttons, reply keyboards and request controls.</p></div><button class="btn primary" id="newTemplate">＋ New message</button></div>
-        <div class="grid two">
-          <div class="card">
-            <div class="section-head"><div><h2 id="templateEditorTitle">New message</h2><p class="card-subtitle">Use placeholders such as {{client.name}} and {{deadline}}.</p></div></div>
-            <div class="inline-fields">
-              <div class="field"><label>Name</label><input id="templateName" placeholder="Reminder"></div>
-              <div class="field"><label>Parse mode</label><select id="templateParse"><option>HTML</option><option>Markdown</option><option>MarkdownV2</option></select></div>
-            </div>
-            <div class="field"><label>Message text</label><textarea id="templateBody" style="min-height:190px">Hi {{client.name}}!\n\nPlease complete the task before {{deadline}}.\nRemaining: {{remaining_count}}.</textarea></div>
-            <div class="section-head"><div><h2>Telegram controls</h2><p class="card-subtitle">Rows and ordering are preserved.</p></div><button class="btn small" id="addControl">＋ Add control</button></div>
-            <div class="list-editor" id="controlRows"></div>
-            <div class="form-actions"><button class="btn ghost" id="cancelTemplate">Reset</button><button class="btn primary" id="saveTemplate">Save message</button></div>
-          </div>
-          <div>
-            <div class="card"><div class="section-head"><div><h2>Preview</h2><p class="card-subtitle">Example values are used for placeholders.</p></div></div><div class="preview" id="messagePreview"></div></div>
-            <div class="card"><div class="section-head"><div><h2>Saved messages</h2></div></div><div id="templateList"></div></div>
-          </div>
-        </div>
-      </section>
+      <section class="view hidden" id="messages"><div class="page-head"><div><h1 class="page-title" data-i18n="messages">Messages</h1><p class="page-description" data-i18n="messagesDescription">Reusable content with aliases and Telegram controls.</p></div><button class="btn primary" id="newTemplate">＋ <span data-i18n="newMessage">New message</span></button></div><div class="editor-layout"><div class="card"><div class="section-head"><h2 id="templateEditorTitle" data-i18n="newMessage">New message</h2></div><div class="form-grid two"><div class="field"><label data-i18n="name">Name</label><input id="templateName"></div><div class="field"><label>Parse mode</label><select id="templateParse"><option>HTML</option><option>Markdown</option><option>MarkdownV2</option></select></div></div><div class="field"><label data-i18n="messageText">Message text</label><textarea id="templateBody" class="message-editor"></textarea></div><div class="section-head"><h2 data-i18n="telegramControls">Telegram controls</h2><button class="btn small" id="addControl">＋ <span data-i18n="addControl">Add control</span></button></div><div class="list-editor" id="controlRows"></div><div class="form-actions"><button class="btn ghost" id="cancelTemplate" data-i18n="reset">Reset</button><button class="btn primary" id="saveTemplate" data-i18n="saveMessage">Save message</button></div></div><aside><div class="card sticky-card"><div class="section-head"><h2 data-i18n="preview">Preview</h2></div><div class="preview" id="messagePreview"></div></div></aside></div><div class="card"><div class="list-toolbar"><label class="searchbox"><span>⌕</span><input id="templateSearch" data-i18n-placeholder="search"></label><select id="templateFilter"><option value="all" data-i18n="all">All</option><option>HTML</option><option>Markdown</option><option>MarkdownV2</option></select></div><div class="card-grid" id="templateList"></div><div class="pager" id="templatePager"></div></div></section>
 
-      <section class="view hidden" id="aliases">
-        <div class="page-head"><div><h1 class="page-title">Aliases</h1><p class="page-description">Global reusable values available as {{alias_name}} in every message.</p></div></div>
-        <div class="card">
-          <div class="inline-fields"><div class="field"><label>Alias</label><input id="aliasKey" placeholder="company_name"></div><div class="field"><label>Value</label><input id="aliasValue" placeholder="Acme"></div></div>
-          <div class="form-actions"><button class="btn primary" id="saveAlias">Save alias</button></div>
-        </div>
-        <div class="card"><div class="table-wrap"><table class="table"><thead><tr><th>Placeholder</th><th>Value</th><th></th></tr></thead><tbody id="aliasRows"></tbody></table></div></div>
-      </section>
+      <section class="view hidden" id="aliases"><div class="page-head"><div><h1 class="page-title" data-i18n="aliases">Aliases</h1><p class="page-description" data-i18n="aliasesDescription">Reusable values available in every message.</p></div></div><div class="card compact-form"><div class="form-grid three"><div class="field"><label data-i18n="alias">Alias</label><input id="aliasKey"></div><div class="field"><label data-i18n="value">Value</label><input id="aliasValue"></div><div class="field action-field"><button class="btn primary" id="saveAlias" data-i18n="saveAlias">Save alias</button></div></div></div><div class="card"><div class="list-toolbar"><label class="searchbox"><span>⌕</span><input id="aliasSearch" data-i18n-placeholder="search"></label><select id="aliasFilter"><option value="all" data-i18n="all">All</option><option value="global" data-i18n="global">Global</option></select></div><div class="table-wrap"><table class="table"><thead><tr><th data-i18n="placeholder">Placeholder</th><th data-i18n="value">Value</th><th></th></tr></thead><tbody id="aliasRows"></tbody></table></div><div class="pager" id="aliasPager"></div></div></section>
 
-      <section class="view hidden" id="conditions">
-        <div class="page-head"><div><h1 class="page-title">Conditions</h1><p class="page-description">Build nested ALL/ANY rules and configure multiple THEN/ELSE actions without editing JSON.</p></div><div class="actions"><button class="btn" id="addRootCondition">＋ Condition</button><button class="btn" id="addRootGroup">＋ Group</button></div></div>
-        <div class="grid two">
-          <div class="card">
-            <div class="section-head"><div><h2>WHEN</h2><p class="card-subtitle">Conditions can be nested up to eight levels.</p></div></div>
-            <div class="rule-tree" id="conditionTree"></div>
-            <div class="divider"></div>
-            <div class="section-head"><div><h2>THEN</h2></div><button class="btn small" data-add-action="then">＋ Action</button></div>
-            <div class="list-editor" id="thenActions"></div>
-            <div class="divider"></div>
-            <div class="section-head"><div><h2>ELSE</h2></div><button class="btn small" data-add-action="else">＋ Action</button></div>
-            <div class="list-editor" id="elseActions"></div>
-            <div class="form-actions"><span class="muted" id="conditionValidity"></span><button class="btn primary" id="validateCondition">Validate rule</button></div>
-          </div>
-          <div class="card">
-            <div class="tabs"><button class="tab active" data-condition-tab="readable">Readable</button><button class="tab" data-condition-tab="json">JSON preview</button></div>
-            <pre class="preview" id="conditionReadable"></pre><pre class="preview hidden" id="conditionJson"></pre>
-          </div>
-        </div>
-      </section>
+      <section class="view hidden" id="conditions"><div class="page-head"><div><h1 class="page-title" data-i18n="conditions">Conditions</h1><p class="page-description" data-i18n="conditionsDescription">Build reusable WHEN / THEN / ELSE behavior without JSON.</p></div><div class="actions"><button class="btn" id="addRootCondition">＋ <span data-i18n="condition">Condition</span></button><button class="btn" id="addRootGroup">＋ <span data-i18n="group">Group</span></button></div></div><div class="grid two"><div class="card"><div class="section-head"><h2>WHEN</h2></div><div class="rule-tree" id="conditionTree"></div><div class="divider"></div><div class="section-head"><h2>THEN</h2><button class="btn small" data-add-action="then">＋ <span data-i18n="action">Action</span></button></div><div class="list-editor" id="thenActions"></div><div class="divider"></div><div class="section-head"><h2>ELSE</h2><button class="btn small" data-add-action="else">＋ <span data-i18n="action">Action</span></button></div><div class="list-editor" id="elseActions"></div><div class="form-actions"><span class="muted" id="conditionValidity"></span><button class="btn primary" id="validateCondition" data-i18n="validateRule">Validate rule</button></div></div><div class="card"><div class="tabs"><button class="tab active" data-condition-tab="readable" data-i18n="readable">Readable</button><button class="tab" data-condition-tab="json">JSON</button></div><pre class="preview" id="conditionReadable"></pre><pre class="preview hidden" id="conditionJson"></pre></div></div></section>
 
-      <section class="view hidden" id="work">
-        <div class="page-head"><div><h1 class="page-title">Work schedules</h1><p class="page-description">Reusable weekly availability with half-hour precision, split intervals and date exceptions.</p></div><button class="btn primary" id="newWork">＋ New schedule</button></div>
-        <div class="card">
-          <div class="section-head"><div><h2 id="workEditorTitle">New schedule</h2><p class="card-subtitle">Drag across cells to add or remove working time.</p></div></div>
-          <div class="inline-fields"><div class="field"><label>Name</label><input id="workName" value="Default work schedule"></div><div class="field"><label>Timezone</label><input id="workTimezone" value="Asia/Qyzylorda"></div></div>
-          <label class="checkline"><input type="checkbox" id="workDefault">Default schedule</label>
-          <div class="divider"></div>
-          <div class="schedule-toolbar">
-            <select id="copyFrom"></select><span class="muted" style="align-self:center">to</span><select id="copyTo"></select><button class="btn small" id="copyDay">Copy day</button>
-            <select id="clearDay"></select><button class="btn small" id="clearSelectedDay">Clear day</button>
-          </div>
-          <div class="schedule-scroll"><div class="week-grid" id="weekGrid"></div></div>
-          <div class="divider"></div>
-          <div class="section-head"><div><h2>Date exceptions</h2><p class="card-subtitle">Holidays and special working days.</p></div><button class="btn small" id="addException">＋ Exception</button></div>
-          <div id="exceptionRows"></div>
-          <div class="form-actions"><button class="btn ghost" id="cancelWork">Reset</button><button class="btn primary" id="saveWork">Save schedule</button></div>
-        </div>
-        <div class="card"><div class="table-wrap"><table class="table"><thead><tr><th>Name</th><th>Timezone</th><th>Default</th><th></th></tr></thead><tbody id="workRows"></tbody></table></div></div>
-      </section>
+      <section class="view hidden" id="work"><div class="page-head"><div><h1 class="page-title" data-i18n="workSchedules">Work schedules</h1><p class="page-description" data-i18n="workDescription">Reusable availability with half-hour precision and date exceptions.</p></div><button class="btn primary" id="newWork">＋ <span data-i18n="newSchedule">New schedule</span></button></div><div class="card"><div class="section-head"><h2 id="workEditorTitle" data-i18n="newSchedule">New schedule</h2></div><div class="form-grid three"><div class="field"><label data-i18n="name">Name</label><input id="workName"></div><div class="field"><label data-i18n="timezone">Timezone</label><input id="workTimezone"></div><label class="option-row compact-option"><input type="checkbox" id="workDefault"><span><b data-i18n="defaultSchedule">Default schedule</b></span></label></div><div class="schedule-toolbar"><select id="copyFrom"></select><span class="muted">→</span><select id="copyTo"></select><button class="btn small" id="copyDay" data-i18n="copyDay">Copy day</button><select id="clearDay"></select><button class="btn small" id="clearSelectedDay" data-i18n="clearDay">Clear day</button></div><div class="schedule-scroll"><div class="week-grid" id="weekGrid"></div></div><div class="divider"></div><div class="section-head"><h2 data-i18n="dateExceptions">Date exceptions</h2><button class="btn small" id="addException">＋ <span data-i18n="exception">Exception</span></button></div><div id="exceptionRows"></div><div class="form-actions"><button class="btn ghost" id="cancelWork" data-i18n="reset">Reset</button><button class="btn primary" id="saveWork" data-i18n="saveSchedule">Save schedule</button></div></div><div class="card"><div class="list-toolbar"><label class="searchbox"><span>⌕</span><input id="workSearch" data-i18n-placeholder="search"></label><select id="workFilter"><option value="all" data-i18n="all">All</option><option value="default" data-i18n="defaultSchedule">Default</option><option value="custom" data-i18n="custom">Custom</option></select></div><div class="table-wrap"><table class="table"><thead><tr><th data-i18n="name">Name</th><th data-i18n="timezone">Timezone</th><th data-i18n="type">Type</th><th></th></tr></thead><tbody id="workRows"></tbody></table></div><div class="pager" id="workPager"></div></div></section>
 
-      <section class="view hidden" id="deliveries">
-        <div class="page-head"><div><h1 class="page-title">Deliveries</h1><p class="page-description">Recent Telegram sends, failures and rendered messages.</p></div><button class="btn" id="refreshDeliveries">↻ Refresh</button></div>
-        <div class="card"><div class="table-wrap"><table class="table"><thead><tr><th>Time</th><th>Reminder</th><th>Client</th><th>Status</th><th>Message</th></tr></thead><tbody id="deliveryRows"></tbody></table></div></div>
-      </section>
+      <section class="view hidden" id="deliveries"><div class="page-head"><div><h1 class="page-title" data-i18n="deliveries">Deliveries</h1><p class="page-description" data-i18n="deliveriesDescription">Recent Telegram sends, failures and rendered messages.</p></div><button class="btn" id="refreshDeliveries">↻ <span data-i18n="refresh">Refresh</span></button></div><div class="card"><div class="list-toolbar"><label class="searchbox"><span>⌕</span><input id="deliverySearch" data-i18n-placeholder="search"></label><select id="deliveryFilter"><option value="all" data-i18n="all">All</option><option value="sent" data-i18n="sent">Sent</option><option value="failed" data-i18n="failed">Failed</option></select></div><div class="table-wrap"><table class="table"><thead><tr><th data-i18n="time">Time</th><th data-i18n="reminder">Reminder</th><th data-i18n="client">Client</th><th data-i18n="status">Status</th><th data-i18n="message">Message</th><th></th></tr></thead><tbody id="deliveryRows"></tbody></table></div><div class="pager" id="deliveryPager"></div></div></section>
 
-      <section class="view hidden" id="settings">
-        <div class="page-head"><div><h1 class="page-title">Settings</h1><p class="page-description">Bot identity, parse mode, timezone and Telegram commands.</p></div></div>
-        <div class="grid two">
-          <div class="card">
-            <div class="section-head"><div><h2>Bot configuration</h2><p class="card-subtitle">Secrets remain in hosted runtime settings.</p></div></div>
-            <div class="inline-fields"><div class="field"><label>Name</label><input id="botName" value="Cue"></div><div class="field"><label>Username</label><input id="botUsername" placeholder="cue_bot"></div></div>
-            <div class="inline-fields"><div class="field"><label>Default parse mode</label><select id="botParse"><option>HTML</option><option>Markdown</option><option>MarkdownV2</option></select></div><div class="field"><label>Timezone</label><input id="botTimezone" value="Asia/Qyzylorda"></div></div>
-            <label class="checkline"><input type="checkbox" id="botEnabled" checked>Bot enabled</label>
-            <div class="divider"></div>
-            <div class="section-head"><div><h2>Commands</h2><p class="card-subtitle">Command names omit the leading slash.</p></div><button class="btn small" id="addCommand">＋ Command</button></div>
-            <div class="list-editor" id="commandRows"></div>
-            <div class="form-actions"><button class="btn" id="syncCommands">Sync to Telegram</button><button class="btn primary" id="saveBotConfig">Save settings</button></div>
-          </div>
-          <div class="card">
-            <div class="section-head"><div><h2>Deployment status</h2><p class="card-subtitle">No secret values are displayed.</p></div></div>
-            <div class="readiness" id="settingsReadiness"></div>
-            <div class="callout" style="margin-top:16px"><strong>Private deployment</strong><br>The admin interface remains owner-only. Telegram webhook and scheduler traffic need a separate public integration surface before live automation can run.</div>
-          </div>
-        </div>
-      </section>
+      <section class="view hidden" id="settings"><div class="page-head"><div><h1 class="page-title" data-i18n="settings">Settings</h1><p class="page-description" data-i18n="settingsDescription">Bot identity, parse mode, timezone and Telegram commands.</p></div></div><div class="grid two"><div class="card"><div class="section-head"><h2 data-i18n="botConfiguration">Bot configuration</h2></div><div class="form-grid two"><div class="field"><label data-i18n="name">Name</label><input id="botName"></div><div class="field"><label>Username</label><input id="botUsername"></div><div class="field"><label>Parse mode</label><select id="botParse"><option>HTML</option><option>Markdown</option><option>MarkdownV2</option></select></div><div class="field"><label data-i18n="timezone">Timezone</label><input id="botTimezone"></div></div><label class="option-row compact-option"><input type="checkbox" id="botEnabled"><span><b data-i18n="botEnabled">Bot enabled</b></span></label><div class="divider"></div><div class="section-head"><h2 data-i18n="commands">Commands</h2><button class="btn small" id="addCommand">＋ <span data-i18n="command">Command</span></button></div><div class="list-editor" id="commandRows"></div><div class="form-actions"><button class="btn" id="syncCommands" data-i18n="syncTelegram">Sync to Telegram</button><button class="btn primary" id="saveBotConfig" data-i18n="saveSettings">Save settings</button></div></div><div class="card"><div class="section-head"><h2 data-i18n="deploymentStatus">Deployment status</h2></div><div class="readiness" id="settingsReadiness"></div><div class="callout"><strong data-i18n="privateDeployment">Private deployment</strong><br><span data-i18n="privateDeploymentHint">The admin interface remains owner-only. Public integrations require a separate protected surface.</span></div></div></div></section>
     </main>
   </div>
 </div>
-<div class="toast hidden" id="toast"></div>
-<script>${uiScript}</script>
-</body>
-</html>`;
+<dialog id="confirmDialog" class="confirm-dialog"><form method="dialog"><div class="confirm-icon">!</div><h2 data-i18n="confirmDelete">Delete item?</h2><p id="confirmMessage"></p><div class="form-actions"><button value="cancel" class="btn ghost" id="confirmCancel" data-i18n="cancel">Cancel</button><button value="confirm" class="btn danger solid" id="confirmAccept" data-i18n="delete">Delete</button></div></form></dialog><div class="toast hidden" id="toast"></div><script>${uiScript}</script></body></html>`;

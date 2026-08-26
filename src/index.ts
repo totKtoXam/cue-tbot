@@ -121,6 +121,17 @@ app.put('/api/clients/:id', async (c) => {
   return c.json({ ok: true });
 });
 
+app.delete('/api/clients/:id', async (c) => {
+  const clientId = c.req.param('id');
+  await c.env.DB.batch([
+    c.env.DB.prepare('DELETE FROM reminder_targets WHERE client_id=?').bind(clientId),
+    c.env.DB.prepare('UPDATE checklist_items SET client_id=NULL WHERE client_id=?').bind(clientId),
+    c.env.DB.prepare('UPDATE delivery_log SET client_id=NULL WHERE client_id=?').bind(clientId),
+    c.env.DB.prepare('DELETE FROM clients WHERE id=?').bind(clientId)
+  ]);
+  return c.json({ ok: true });
+});
+
 app.post('/api/aliases', async (c) => {
   const body = z.object({ key: z.string().regex(/^[A-Za-z0-9_.-]+$/), value: z.string() }).parse(await c.req.json());
   await c.env.DB.prepare('INSERT INTO aliases(id,key,value) VALUES(?,?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=CURRENT_TIMESTAMP')
@@ -158,6 +169,17 @@ app.put('/api/templates/:id', async (c) => {
   return c.json({ ok: true });
 });
 
+app.delete('/api/templates/:id', async (c) => {
+  const templateId = c.req.param('id');
+  const usage = await one<{ n: number }>(c.env.DB, 'SELECT COUNT(*) n FROM reminder_definitions WHERE template_id=?', templateId);
+  if ((usage?.n ?? 0) > 0) return c.json({ error: 'Message is used by a reminder. Change or delete that reminder first.' }, 409);
+  await c.env.DB.batch([
+    c.env.DB.prepare('UPDATE delivery_log SET template_id=NULL WHERE template_id=?').bind(templateId),
+    c.env.DB.prepare('DELETE FROM message_templates WHERE id=?').bind(templateId)
+  ]);
+  return c.json({ ok: true });
+});
+
 const intervalSchema = z.object({
   start: z.string().regex(/^\d{2}:\d{2}$/),
   end: z.string().regex(/^\d{2}:\d{2}$/)
@@ -186,6 +208,15 @@ app.put('/api/work-schedules/:id', async (c) => {
   return c.json({ ok: true });
 });
 
+app.delete('/api/work-schedules/:id', async (c) => {
+  const scheduleId = c.req.param('id');
+  await c.env.DB.batch([
+    c.env.DB.prepare('UPDATE reminder_definitions SET work_schedule_id=NULL WHERE work_schedule_id=?').bind(scheduleId),
+    c.env.DB.prepare('DELETE FROM work_schedules WHERE id=?').bind(scheduleId)
+  ]);
+  return c.json({ ok: true });
+});
+
 app.post('/api/work-schedules/seed-default', async (c) => {
   const existing = await one<{ id: string }>(c.env.DB, 'SELECT id FROM work_schedules WHERE is_default=1 LIMIT 1');
   if (existing) return c.json({ ok: true, id: existing.id });
@@ -196,15 +227,38 @@ app.post('/api/work-schedules/seed-default', async (c) => {
   return c.json({ ok: true, id: scheduleId }, 201);
 });
 
+const reminderScheduleSchema = z.object({
+  kind: z.enum(['weekly', 'once', 'recurring', 'ongoing']).default('recurring'),
+  weekdays: z.array(z.string()).default([]),
+  date: z.string().optional(),
+  startTime: z.string().default('09:00'),
+  stopTime: z.string().default('18:00'),
+  allDay: z.boolean().default(false),
+  repeatEveryMinutes: z.number().int().min(10),
+  timezone: z.string().min(1)
+}).superRefine((value, context) => {
+  if (value.kind === 'once' && !value.date) context.addIssue({ code: 'custom', message: 'Date is required for a one-time reminder.' });
+  if (value.kind === 'recurring' && value.weekdays.length === 0) context.addIssue({ code: 'custom', message: 'Choose at least one active weekday.' });
+  if (!value.allDay && value.startTime > value.stopTime) context.addIssue({ code: 'custom', message: 'Start time must be before stop time.' });
+});
+
+const pauseRuleSchema = z.object({
+  type: z.enum(['recurring', 'date', 'date_range']).default('recurring'),
+  weekdays: z.array(z.string()).optional(),
+  date: z.string().optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+  allDay: z.boolean().default(false),
+  startTime: z.string().optional(),
+  endTime: z.string().optional()
+});
+
 const reminderSchema = z.object({
   name: z.string().min(1), description: z.string().optional(), template_id: z.string().min(1),
   work_schedule_id: z.string().optional().nullable(),
   priority: z.enum(['low', 'normal', 'high', 'critical']).default('normal'),
-  schedule: z.object({
-    kind: z.literal('weekly').optional(), weekdays: z.array(z.string()).min(1),
-    startTime: z.string(), stopTime: z.string(), repeatEveryMinutes: z.number().int().min(1), timezone: z.string()
-  }),
-  pauseRules: z.array(z.object({ weekdays: z.array(z.string()).optional(), startTime: z.string(), endTime: z.string() })).default([]),
+  schedule: reminderScheduleSchema,
+  pauseRules: z.array(pauseRuleSchema).default([]),
   checklistMode: z.boolean().default(false), targetIds: z.array(z.string()).default([]),
   conditionRule: z.unknown().optional().nullable(), enabled: z.boolean().default(true)
 });
@@ -235,6 +289,18 @@ app.put('/api/reminders/:id', async (c) => {
   return c.json({ ok: true });
 });
 
+app.delete('/api/reminders/:id', async (c) => {
+  const reminderId = c.req.param('id');
+  await c.env.DB.batch([
+    c.env.DB.prepare('DELETE FROM delivery_log WHERE run_id IN (SELECT id FROM reminder_runs WHERE reminder_id=?)').bind(reminderId),
+    c.env.DB.prepare('DELETE FROM checklist_items WHERE run_id IN (SELECT id FROM reminder_runs WHERE reminder_id=?)').bind(reminderId),
+    c.env.DB.prepare('DELETE FROM reminder_runs WHERE reminder_id=?').bind(reminderId),
+    c.env.DB.prepare('DELETE FROM reminder_targets WHERE reminder_id=?').bind(reminderId),
+    c.env.DB.prepare('DELETE FROM reminder_definitions WHERE id=?').bind(reminderId)
+  ]);
+  return c.json({ ok: true });
+});
+
 app.post('/api/rules/validate', async (c) => {
   const rule = await c.req.json<RuleDefinition>();
   const errors = validateCondition(rule.condition);
@@ -261,6 +327,19 @@ app.post('/api/runs/:id/stop', async (c) => {
   await c.env.DB.prepare("UPDATE reminder_runs SET status='stopped',stopped_at=CURRENT_TIMESTAMP WHERE id=?").bind(c.req.param('id')).run();
   return c.json({ ok: true });
 });
+app.delete('/api/runs/:id', async (c) => {
+  const runId = c.req.param('id');
+  await c.env.DB.batch([
+    c.env.DB.prepare('DELETE FROM delivery_log WHERE run_id=?').bind(runId),
+    c.env.DB.prepare('DELETE FROM checklist_items WHERE run_id=?').bind(runId),
+    c.env.DB.prepare('DELETE FROM reminder_runs WHERE id=?').bind(runId)
+  ]);
+  return c.json({ ok: true });
+});
+app.delete('/api/deliveries/:id', async (c) => {
+  await c.env.DB.prepare('DELETE FROM delivery_log WHERE id=?').bind(c.req.param('id')).run();
+  return c.json({ ok: true });
+});
 app.post('/api/checklist/:id/toggle', async (c) => {
   const item = await one<{ status: string; run_id: string }>(c.env.DB, 'SELECT status,run_id FROM checklist_items WHERE id=?', c.req.param('id'));
   if (!item) return c.json({ error: 'not found' }, 404);
@@ -269,39 +348,6 @@ app.post('/api/checklist/:id/toggle', async (c) => {
     .bind(next, next, c.req.param('id')).run();
   if (next === 'done') await completeRunIfDone(c.env.DB, item.run_id);
   return c.json({ ok: true, status: next });
-});
-
-app.post('/api/presets/timesheet', async (c) => {
-  const existing = await one<{ id: string }>(c.env.DB, "SELECT id FROM reminder_definitions WHERE name='Weekly timesheet' LIMIT 1");
-  if (existing) return c.json({ ok: true, reminderId: existing.id, created: false });
-  let workSchedule = await one<{ id: string }>(c.env.DB, 'SELECT id FROM work_schedules WHERE is_default=1 LIMIT 1');
-  if (!workSchedule) {
-    const schedule = defaultWorkSchedule(c.env.APP_TIMEZONE ?? 'Asia/Qyzylorda');
-    const workId = id('ws');
-    await c.env.DB.prepare('INSERT INTO work_schedules(id,name,timezone,weekly_json,exceptions_json,is_default) VALUES(?,?,?,?,?,1)')
-      .bind(workId, 'Default work schedule', schedule.timezone, JSON.stringify(schedule.weekly), JSON.stringify(schedule.exceptions ?? [])).run();
-    workSchedule = { id: workId };
-  }
-  const templateId = id('tpl');
-  const reminderId = id('rem');
-  const schedule: ReminderSchedule = { kind: 'weekly', weekdays: ['fri'], startTime: '14:00', stopTime: '23:59', repeatEveryMinutes: 30, timezone: c.env.APP_TIMEZONE ?? 'Asia/Qyzylorda' };
-  const rule: RuleDefinition = {
-    condition: { type: 'group', operator: 'and', children: [
-      { type: 'condition', left: 'checklist.pendingCount', operator: 'gt', right: 0 },
-      { type: 'condition', left: 'schedule.isWorkingTime', operator: 'eq', right: true }
-    ] },
-    then: [{ type: 'select_pending' }, { type: 'send_message' }],
-    else: [{ type: 'skip' }]
-  };
-  await c.env.DB.batch([
-    c.env.DB.prepare('INSERT INTO message_templates(id,name,body,controls_json) VALUES(?,?,?,?)')
-      .bind(templateId, 'Weekly timesheet', 'Hi {{client.name}}!\n\nPlease complete your timesheet before {{deadline}}.\nRemaining: {{remaining_count}}.', JSON.stringify([{ type: 'callback', text: 'Done', value: 'checklist:done', row: 0 }])),
-    c.env.DB.prepare('INSERT INTO reminder_definitions(id,name,description,template_id,work_schedule_id,priority,schedule_json,condition_rule_json,checklist_mode) VALUES(?,?,?,?,?,?,?,?,1)')
-      .bind(reminderId, 'Weekly timesheet', 'Friday reminder that follows the configured Work Schedule.', templateId, workSchedule.id, 'high', JSON.stringify(schedule), JSON.stringify(rule))
-  ]);
-  const clients = await list<{ id: string }>(c.env.DB, 'SELECT id FROM clients WHERE is_active=1');
-  await replaceTargets(c.env.DB, reminderId, clients.map((client) => client.id));
-  return c.json({ ok: true, reminderId, created: true }, 201);
 });
 
 async function telegram(env: Env, method: string, payload: unknown) {
@@ -519,8 +565,13 @@ app.post('/api/cron/tick', async (c) => {
       }
     }
     const nextExecution = new Date(now.getTime() + schedule.repeatEveryMinutes * 60_000).toISOString();
-    await c.env.DB.prepare('UPDATE reminder_runs SET attempt=attempt+1,last_executed_at=CURRENT_TIMESTAMP,next_execution_at=? WHERE id=? AND status=?')
-      .bind(nextExecution, run.id, 'active').run();
+    if (schedule.kind === 'once') {
+      await c.env.DB.prepare("UPDATE reminder_runs SET attempt=attempt+1,last_executed_at=CURRENT_TIMESTAMP,next_execution_at=NULL,status='completed',stopped_at=CURRENT_TIMESTAMP WHERE id=? AND status='active'")
+        .bind(run.id).run();
+    } else {
+      await c.env.DB.prepare('UPDATE reminder_runs SET attempt=attempt+1,last_executed_at=CURRENT_TIMESTAMP,next_execution_at=? WHERE id=? AND status=?')
+        .bind(nextExecution, run.id, 'active').run();
+    }
   }
   return c.json({ ok: true, sent });
 });

@@ -1,8 +1,10 @@
 export interface ReminderSchedule {
-  kind?: 'weekly';
+  kind?: 'weekly' | 'once' | 'recurring' | 'ongoing';
   weekdays: string[];
+  date?: string;
   startTime: string;
   stopTime: string;
+  allDay?: boolean;
   repeatEveryMinutes: number;
   timezone: string;
   workingStart?: string;
@@ -34,16 +36,24 @@ function isoWeek(year: number, month: number, day: number): string {
 
 export function periodKey(schedule: ReminderSchedule, now: Date): string {
   const p = localClock(schedule.timezone ?? 'UTC', now);
-  if ((schedule.kind ?? 'weekly') === 'weekly') {
+  const kind = schedule.kind ?? 'weekly';
+  if (kind === 'ongoing') return 'ongoing';
+  if (kind === 'weekly' || kind === 'recurring') {
     return isoWeek(Number(p.year), Number(p.month), Number(p.day));
   }
-  return `${p.year}-${p.month}-${p.day}`;
+  return schedule.date || `${p.year}-${p.month}-${p.day}`;
 }
 
 export function scheduleWindow(schedule: ReminderSchedule, now: Date): 'before' | 'active' | 'after' | 'offday' {
   const p = localClock(schedule.timezone ?? 'UTC', now);
+  const localDate = `${p.year}-${p.month}-${p.day}`;
+  const kind = schedule.kind ?? 'weekly';
+  if (kind === 'once' && schedule.date && localDate !== schedule.date) {
+    return localDate < schedule.date ? 'before' : 'after';
+  }
   const weekday = String(p.weekday).toLowerCase().slice(0, 3);
-  if (!schedule.weekdays.includes(weekday)) return 'offday';
+  if (kind !== 'once' && schedule.weekdays.length && !schedule.weekdays.includes(weekday)) return 'offday';
+  if (schedule.allDay) return 'active';
   const hhmm = `${p.hour}:${p.minute}`;
   if (hhmm < schedule.startTime) return 'before';
   if (hhmm > schedule.stopTime) return 'after';
@@ -57,16 +67,32 @@ export function scheduleDue(schedule: ReminderSchedule, now: Date, lastExecution
 }
 
 export function isPausedByRule(
-  rules: Array<{ weekdays?: string[]; startTime?: string; endTime?: string }>,
+  rules: Array<{
+    type?: 'recurring' | 'date' | 'date_range';
+    weekdays?: string[];
+    date?: string;
+    startDate?: string;
+    endDate?: string;
+    allDay?: boolean;
+    startTime?: string;
+    endTime?: string;
+  }>,
   now: Date,
   timezone: string
 ): boolean {
   const p = localClock(timezone, now);
   const weekday = String(p.weekday).toLowerCase().slice(0, 3);
+  const localDate = `${p.year}-${p.month}-${p.day}`;
   const hhmm = `${p.hour}:${p.minute}`;
-  return rules.some((rule) =>
-    (!rule.weekdays || rule.weekdays.includes(weekday)) &&
-    Boolean(rule.startTime && rule.endTime) &&
-    hhmm >= String(rule.startTime) && hhmm <= String(rule.endTime)
-  );
+  return rules.some((rule) => {
+    const type = rule.type ?? 'recurring';
+    const dateMatches = type === 'date'
+      ? rule.date === localDate
+      : type === 'date_range'
+        ? Boolean(rule.startDate && rule.endDate && localDate >= rule.startDate && localDate <= rule.endDate)
+        : !rule.weekdays?.length || rule.weekdays.includes(weekday);
+    if (!dateMatches) return false;
+    if (rule.allDay) return true;
+    return Boolean(rule.startTime && rule.endTime) && hhmm >= String(rule.startTime) && hhmm <= String(rule.endTime);
+  });
 }
