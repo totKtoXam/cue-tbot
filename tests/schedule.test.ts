@@ -41,7 +41,7 @@ describe('adaptive reminder types', () => {
     expect(periodKey(once, new Date('2026-08-28T15:00:00Z'))).toBe('2026-08-28');
   });
 
-  it('supports an all-day ongoing reminder', () => {
+  it('keeps legacy ongoing schedules compatible', () => {
     const ongoing: ReminderSchedule = {
       kind: 'ongoing', weekdays: ['fri'], startTime: '00:00', stopTime: '00:00', allDay: true,
       repeatEveryMinutes: 30, timezone: 'UTC'
