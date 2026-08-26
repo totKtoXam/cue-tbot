@@ -4,13 +4,13 @@ Cue is a configurable Telegram reminder and automation engine with a visual cond
 
 ## Core concepts
 
-- **Reminder Definition** — a one-time, recurring or ongoing trigger with Work Schedule, template, targeting, conditions and typed pause rules.
+- **Reminder Definition** — a one-time or recurring schedule with Work Schedule, template, targeting, conditions and typed pause rules.
 - **Reminder Run** — one recurrence-period execution with attempts, checklist state, pause/stop state and delivery history.
 - **Work Schedule** — reusable built-in weekly schedule with multiple intervals per day, timezone and date exceptions.
 - **Clients** — Telegram recipients.
 - **Templates & aliases** — reusable messages using `{{client.name}}`, `{{deadline}}`, `{{remaining_count}}`, `{{reminder.name}}` and custom aliases.
 - **Conditions Builder** — visual nested AND/OR groups with field/operator/value rules and workflow actions.
-- **Checklist mode** — reminders target pending items only until everything is done, the allowed time ends or the run is stopped.
+- **Completion tracking** — independent from the schedule type. When enabled, Cue creates a checklist and reminds only pending recipients until everything is done, the allowed time ends or the run is stopped.
 
 ## Work Schedule
 

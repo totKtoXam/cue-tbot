@@ -565,7 +565,7 @@ app.post('/api/cron/tick', async (c) => {
       }
     }
     const nextExecution = new Date(now.getTime() + schedule.repeatEveryMinutes * 60_000).toISOString();
-    if (schedule.kind === 'once') {
+    if (schedule.kind === 'once' && !bool(definition.checklist_mode)) {
       await c.env.DB.prepare("UPDATE reminder_runs SET attempt=attempt+1,last_executed_at=CURRENT_TIMESTAMP,next_execution_at=NULL,status='completed',stopped_at=CURRENT_TIMESTAMP WHERE id=? AND status='active'")
         .bind(run.id).run();
     } else {
